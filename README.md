@@ -67,6 +67,178 @@ Single-File HTML-Anwendung zur Steuerung von 10-20 parallelen Projekten im Berei
 
 ---
 
+## Use Cases
+
+### UC1: Morgens den Tag starten (5 Minuten)
+
+1. App oeffnen -- startet in **Mein Tag**
+2. **"KI: Tag planen"** klicken -- KI schlaegt 5-7 Aufgaben vor basierend auf Deadlines, Prio und Terminen
+3. Vorschlaege durchgehen, passende uebernehmen, ggf. anpassen
+4. Optional: Eigene Todos ergaenzen (AP waehlen oder freie Todos)
+5. Im Laufe des Tages: Abhaken, Stunden und Notizen eintragen
+
+**Ergebnis:** Strukturierter Arbeitstag, gebuchte Stunden fliessen automatisch in die Projekte zurueck.
+
+### UC2: Neues ISMS-Projekt aufsetzen
+
+1. Projekt anlegen (Name, Kunde, Rolle: Leiter, Vorgehensweise: Standard)
+2. Projektdetail oeffnen -- **BSI-Vorlage "ISMS-Aufbau"** anwenden
+3. 12 Arbeitspakete werden automatisch angelegt (Scope bis Management Review)
+4. Meilensteine ergaenzen (Zertifizierungstermin, Audittermine)
+5. Personen zuweisen ueber KI: **"Delegation vorschlagen"**
+6. Kundenkontakt als Person anlegen (Rolle: Kundenansprechpartner, Anrede: Herr/Frau)
+
+**Ergebnis:** Projekt vollstaendig aufgesetzt mit AP-Struktur nach BSI 200-1/2, Verantwortlichkeiten, Meilensteinen.
+
+### UC3: Wochentliches Kunden-Statusupdate
+
+1. Projektdetail oeffnen -- **"Statusbericht"** klicken
+2. Bericht wird generiert: Ampel, Fortschritt, Soll/Ist, erledigte AP, offene Risiken, naechste Schritte
+3. Text kopieren und in E-Mail einfuegen, oder:
+4. **"E-Mail entwerfen"** klicken -- Use Case "Status-Update" waehlen, Empfaenger waehlen, Tonalitaet einstellen
+5. KI generiert E-Mail mit Projektkontext -- Text bearbeiten, kopieren, ab in Outlook
+
+**Ergebnis:** Professionelles Statusupdate in 2 Minuten statt 20.
+
+### UC4: Delegation und Nachverfolgung
+
+1. AP oeffnen -- Verantwortlichen zuweisen
+2. **Delegationslevel** waehlen (z.B. "Beraten -- Mach das, weil...")
+3. Wiedervorlage-Datum setzen (z.B. in 5 Tagen)
+4. Optional: KI generiert passenden Delegationstext zum Kopieren
+5. Nach Ablauf der Wiedervorlage: Follow-up erscheint automatisch im Cockpit und Projektdetail
+6. **"Nachfass-Text"** klicken -- KI generiert freundliche Erinnerung passend zum Delegationslevel
+
+**Ergebnis:** Nichts faellt durch, Delegation mit System statt Bauchgefuehl.
+
+### UC5: Meeting auswerten
+
+1. Nach dem Meeting: Projektdetail oeffnen -- **"Transkript auswerten"**
+2. Meeting-Protokoll oder Transkript in das Textfeld einfuegen
+3. KI extrahiert automatisch: Arbeitspakete, Entscheidungen, Risiken, Follow-ups
+4. Jeden Vorschlag einzeln pruefen und per Klick uebernehmen
+5. AP landen im Projekt, Entscheidungen als Notizen, Risiken im Register
+
+**Ergebnis:** Kein "was hatten wir nochmal besprochen?" -- alles sofort strukturiert erfasst.
+
+### UC6: Per Sprache oder Freitext steuern
+
+1. Projektdetail -- In das Textfeld tippen oder Mikrofon klicken
+2. Sprechen: *"Die Carolin soll bis Freitag die ORP.1 Richtlinie fertig haben, hoch priorisiert. Ausserdem brauchen wir einen Meilenstein am 30. April fuer den Audit."*
+3. KI interpretiert und zeigt strukturierte Kommandos als Vorschau: update_ap + create_milestone
+4. Pruefen, ggf. einzelne abwaehlen, "Alle anwenden"
+
+**Ergebnis:** Natuerliche Sprache wird zu Projektaenderungen -- keine Formulare noetig.
+
+### UC7: Outlook-Kalender synchronisieren
+
+1. In Outlook: Kalender als .ics exportieren
+2. In Leitstand: Kalender-View -- **"Outlook aktualisieren"** klicken, .ics waehlen
+3. Termine werden importiert -- neue hinzugefuegt, geaenderte aktualisiert, entfallene markiert
+4. Bei jedem Termin: Projekt per Dropdown zuordnen (bleibt bei Re-Import erhalten)
+5. Naechste Woche: Neue .ics laden -- nur Aenderungen werden uebernommen
+
+**Ergebnis:** Outlook-Termine und Leitstand-Daten auf einer Zeitachse, ohne doppelte Pflege.
+
+### UC8: BSI-Baustein umsetzen
+
+1. Projektdetail -- BSI-Vorlage **"Baustein-Umsetzung"** anwenden
+2. 7 AP werden angelegt: Richtlinie, Ist-Aufnahme, Gap-Analyse, Massnahmen, Schulung, Nachweise, Review
+3. Oder: **"KI: Zerlegen"** klicken und Baustein-Nummer nennen -- KI erzeugt spezifische AP
+4. Soll-Stunden schaetzen, Verantwortliche zuweisen
+5. Im Verlauf: Ist-Stunden buchen (ueber "Mein Tag" oder direkt im AP)
+6. Fortschritt und Soll/Ist-Abweichung im Projektdetail sichtbar
+
+**Ergebnis:** Strukturierte Baustein-Umsetzung mit Nachvollziehbarkeit.
+
+### UC9: Risiken managen
+
+1. Projektdetail -- **"+ Risiko"** oder KI erkennt Risiko im Transkript
+2. Wahrscheinlichkeit und Auswirkung bewerten (niedrig/mittel/hoch)
+3. Massnahme und Verantwortlichen zuweisen
+4. Risikomatrix im Projektdetail zeigt alle Risiken visuell
+5. Im Statusbericht werden offene Risiken automatisch aufgelistet
+
+**Ergebnis:** Strukturiertes Risikomanagement nach BSI 200-3 statt Bauchgefuehl.
+
+### UC10: Daten aus BlueAnt importieren
+
+1. In BlueAnt: Projekte/AP/Personen als CSV exportieren
+2. In Leitstand: Einstellungen -- **BlueAnt Import** -- Typ waehlen (Projekte/AP/Personen/MS)
+3. Spalten werden automatisch erkannt (Name, Deadline, Aufwand, etc.)
+4. Import-Reihenfolge: Personen, dann Projekte, dann AP/MS (damit Zuordnungen greifen)
+5. Duplikate werden per Name erkannt und uebersprungen
+
+**Ergebnis:** Bestehende BlueAnt-Daten in 5 Minuten im Leitstand, ohne Abtippen.
+
+---
+
+## KI-Funktionen im Detail
+
+### Vorhandene KI-Aktionen
+
+#### Analyse & Planung
+
+| Aktion | Wo | Input | Output | Anonymisiert |
+|--------|-----|-------|--------|:---:|
+| **decompose_task** | Projektdetail: "KI: Zerlegen" | Projekt + vorhandene AP | AP-Vorschlaege mit Aufwand, Reihenfolge, Personenempfehlung | Ja |
+| **suggest_delegation** | Projektdetail: "KI: Delegation" | Offene AP + Personen mit Schwerpunkten | Zuweisungsvorschlaege mit Delegationslevel + Copy-Paste-Text | Ja |
+| **prioritize** | Cockpit: "KI: Priorisierung" | Alle offenen AP + Meilensteine | Eisenhower-Einordnung pro AP mit Begruendung | Ja |
+| **plan_day** | Mein Tag: "KI: Tag planen" | Offene AP + Meilensteine + Termine | Top 5-7 Aufgaben fuer heute mit Stundenbudget | Ja |
+| **weekly_summary** | Cockpit: "KI: Wochenbericht" | Alle Projekte, AP-Status, Meilensteine | Zusammenfassung, Risiken, Empfehlungen naechste Woche | Ja |
+
+#### Kommunikation
+
+| Aktion | Wo | Input | Output | Anonymisiert |
+|--------|-----|-------|--------|:---:|
+| **draft_email** | Projektdetail: "E-Mail entwerfen" | Use Case + Empfaenger + Ton + Projektkontext (editierbar) | Betreff + E-Mail-Text (Copy-Paste-fertig, bearbeitbar) | Ja |
+| **draft_followup** | Projektdetail: "Nachfass-Text" | Delegiertes AP + Person + Tonalitaet | Follow-up-Text passend zum Delegationslevel | Ja |
+| **prepare_meeting** | Projektdetail: "Meeting vorbereiten" | Projektkontext (AP, MS, Risiken) | Agenda + Talking Points + offene Fragen + Risiken | Ja |
+
+#### Datenextraktion
+
+| Aktion | Wo | Input | Output | Anonymisiert |
+|--------|-----|-------|--------|:---:|
+| **parse_transcript** | Projektdetail: "Transkript auswerten" | Meeting-Transkript (Freitext) | AP, Entscheidungen, Risiken, Follow-ups -- einzeln uebernehmbar | Nein (lokal) |
+| **execute_commands** | Projektdetail: NL-Kommandozeile | Freitext oder Spracheingabe | Strukturierte Kommandos: create/update AP, Person, MS, Notiz, Risiko | Ja |
+
+### Moegliche zukuenftige KI-Aktionen
+
+#### Fachlich (BSI-spezifisch)
+
+| Aktion | Beschreibung | Nutzen |
+|--------|-------------|--------|
+| **suggest_bausteine** | Anhand der Zielobjekte eines Projekts passende BSI-Bausteine vorschlagen | Keine Bausteine vergessen, schnellere Modellierung |
+| **draft_document** | Gliederung/Entwurf fuer BSI-Dokumente generieren (Leitlinie, Notfallhandbuch, Richtlinie) | Schneller Start bei Dokumenten statt leere Seite |
+| **assess_risk** | Risikobeschreibung rein, W/A/Massnahme raus basierend auf BSI 200-3 Gefaehrdungskatalog | Konsistente Risikobewertung |
+| **gap_analysis** | GS-Check-Ergebnisse analysieren und priorisierte Massnahmen vorschlagen | Schnellere Realisierungsplanung |
+
+#### Qualitaet & Reflexion
+
+| Aktion | Beschreibung | Nutzen |
+|--------|-------------|--------|
+| **review_project** | Pruefen: AP ergebnisorientiert? 8/80 eingehalten? Abhaengigkeiten sinnvoll? Scope-Luecken? | Qualitaetssicherung des Projektplans |
+| **lessons_learned** | Soll/Ist-Analyse bei Projektabschluss: Was lief gut, wo Ueberschreitungen, Learnings | Verbesserung fuer naechste Projekte |
+| **estimate_effort** | Aufwandsschaetzung fuer neue AP basierend auf Erfahrungswerten aehnlicher AP | Realistischere Planung |
+
+#### Kommunikation (erweitert)
+
+| Aktion | Beschreibung | Nutzen |
+|--------|-------------|--------|
+| **draft_angebot** | Angebotstext fuer Folgebeauftragung oder Change Request basierend auf Projektdaten | Schnellere Angebotserstellung |
+| **prepare_presentation** | Praesentationsstruktur fuer Management-Vorstellung (Ergebnisse, Risiken, naechste Schritte) | Vorbereitung auf Steuerungskreise |
+| **summarize_for_stakeholder** | Zusammenfassung angepasst an Zielgruppe (IT-Leitung vs. Geschaeftsfuehrung vs. Fachbereich) | Zielgruppengerechte Kommunikation |
+
+#### Automatisierung
+
+| Aktion | Beschreibung | Nutzen |
+|--------|-------------|--------|
+| **auto_status_update** | Automatisch generierter Statusbericht der woechentlich per n8n versendet wird | Regelmassige Updates ohne manuellen Aufwand |
+| **smart_reminders** | KI analysiert taglich alle Projekte und pusht kritische Erinnerungen | Proaktive Steuerung statt reaktives Feuerlöschen |
+| **detect_scope_creep** | Baseline-Vergleich durch KI interpretieren lassen, Scope-Veraenderungen bewerten | Fruehwarnsystem fuer Projektrisiken |
+
+---
+
 ## Dateien
 
 | Datei | Beschreibung |
