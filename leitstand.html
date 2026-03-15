@@ -326,7 +326,7 @@
       .ap-chat-header-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; flex: 1; }
       .ap-chat-header-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #dbeafe; color: #1d4ed8; }
       .ap-chat-messages { max-height: 500px; overflow-y: auto; padding: var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-md); }
-      .ap-chat-messages:empty::after { content: 'Schildere einen Sachverhalt und ich helfe dir, daraus Arbeitspakete zu schneiden.'; display: block; text-align: center; color: var(--ci-text-muted); font-size: 12px; padding: 32px; font-style: italic; }
+      .ap-chat-messages:empty::after { content: 'Beschreibe was du brauchst — Arbeitspakete schneiden, Status aendern, Fragen klaeren. Ich helfe.'; display: block; text-align: center; color: var(--ci-text-muted); font-size: 12px; padding: 32px; font-style: italic; }
       .ap-chat-msg { animation: chatFadeIn 0.2s ease-out; }
       @keyframes chatFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .ap-chat-msg-user { border-left: 3px solid var(--ci-color-brand-dark); padding: 8px 12px; font-size: 12px; color: var(--ci-text-dark); background: var(--ci-bg-page); border-radius: 0 6px 6px 0; }
@@ -1388,16 +1388,8 @@
         '</div>' +
         '<div id="ki-inline-comm" class="ki-inline-area"></div>';
 
-      // AP-Assistent Chat
+      // Projekt-Assistent (vereint AP-Chat + NL-Kommandos)
       h += renderAPChat(p.id);
-
-      // NL Command Bar
-      h += '<div class="nl-command-bar">' +
-        '<textarea id="nl-command-text" rows="2" placeholder="Was soll passieren? Schreib einfach..." onkeydown="if(event.ctrlKey&&event.key===\'Enter\'){event.preventDefault();sendNLCommand(\'' + escAttr(p.id) + '\')}"></textarea>' +
-        '<button class="btn btn-primary btn-sm" onclick="sendNLCommand(\'' + escAttr(p.id) + '\')" style="flex-shrink:0"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Senden</button>' +
-        '<button class="mic-btn" id="mic-btn-nl-command-text" onclick="startVoiceInput(\'nl-command-text\')" title="Spracheingabe" style="flex-shrink:0"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>' +
-        '</div>';
-      h += '<div id="nl-command-preview" class="nl-command-preview" style="display:none"></div>';
 
       // Gantt Chart
       h += renderGantt(p.id);
@@ -3347,7 +3339,7 @@
       var h = '<div class="ap-chat" id="ap-chat-' + escAttr(projektId) + '">';
       h += '<div class="ap-chat-header">';
       h += '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ci-color-brand-blue)" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 014-4z"/><line x1="10" y1="18" x2="14" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/></svg>';
-      h += '<span class="ap-chat-header-title">AP-Assistent</span>';
+      h += '<span class="ap-chat-header-title">Projekt-Assistent</span>';
       h += '<span class="ap-chat-header-badge" id="ap-chat-badge-' + escAttr(projektId) + '"' + (msgCount > 0 ? '' : ' style="display:none"') + '>' + (msgCount > 0 ? msgCount + ' Nachrichten' : '') + '</span>';
       h += '</div>';
       h += '<div class="ap-chat-messages" id="ap-chat-messages-' + escAttr(projektId) + '">';
@@ -3497,10 +3489,44 @@
               };
             });
           }
+          // Handle commands (general project changes)
+          if (data.commands && data.commands.length) {
+            var cmdSummary = [];
+            var now = new Date().toISOString();
+            data.commands.forEach(function(cmd) {
+              var d = cmd.data || {};
+              if (cmd.action === 'update_ap' && d.ap_ref) {
+                var ap = Store.arbeitspakete.find(function(a) { return a.titel.toLowerCase().includes(d.ap_ref.toLowerCase()) && a.projekt_id === projektId; });
+                if (ap) {
+                  if (d.status) ap.status = d.status;
+                  if (d.verantwortlicher_ref) { var pe = Store.personen.find(function(p) { return p.name.toLowerCase().includes(d.verantwortlicher_ref.toLowerCase()); }); if (pe) ap.verantwortlicher_id = pe.id; }
+                  if (d.deadline) ap.deadline = d.deadline;
+                  if (d.prioritaet) ap.prioritaet = d.prioritaet;
+                  ap.geaendert = now;
+                  Store.markDirty('arbeitspakete');
+                  cmdSummary.push('AP "' + ap.titel + '" aktualisiert');
+                }
+              } else if (cmd.action === 'create_milestone') {
+                Store.meilensteine.push({ id: U.uid(), projekt_id: projektId, titel: Anonymize.deanonymize(d.titel || ''), datum: d.datum || '', status: 'offen', erstellt: now, geaendert: now });
+                Store.markDirty('meilensteine');
+                cmdSummary.push('MS "' + Anonymize.deanonymize(d.titel || '') + '" angelegt');
+              } else if (cmd.action === 'create_note') {
+                Store.notizen.push({ id: U.uid(), projekt_id: projektId, typ: d.typ || 'notiz', text: Anonymize.deanonymize(d.text || ''), erstellt: now, geaendert: now });
+                Store.markDirty('notizen');
+                cmdSummary.push('Notiz angelegt');
+              } else if (cmd.action === 'update_projekt') {
+                var proj = Store.projekte.find(function(p) { return p.id === projektId; });
+                if (proj) { if (d.status) proj.status = d.status; if (d.prioritaet) proj.prioritaet = d.prioritaet; proj.geaendert = now; Store.markDirty('projekte'); cmdSummary.push('Projekt aktualisiert'); }
+              }
+            });
+            if (cmdSummary.length) { Store.persist(); renderAll(); aiMsg.content += (aiMsg.content ? '\n' : '') + cmdSummary.join(', ') + '.'; }
+          }
+          // Handle direct answer
+          if (data.answer) aiMsg.content += (aiMsg.content ? '\n' : '') + Anonymize.deanonymize(data.answer);
           state.messages.push(aiMsg);
           renderAPChatMessages(projektId);
           updateAPChatBadge(projektId);
-          Toast.show('AP-Assistent hat geantwortet', 'success');
+          Toast.show('Assistent hat geantwortet', 'success');
         })
         .catch(function(err) {
           state.loading = false;
