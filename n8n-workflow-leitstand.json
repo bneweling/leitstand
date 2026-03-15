@@ -1,0 +1,858 @@
+{
+  "name": "TEST_HTML_Leitstand",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leitstand-ki",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        480
+      ],
+      "webhookId": "leitstand-ki"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-test",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-test",
+      "name": "IF Test?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        160,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: \"ok\", timestamp: Date.now(), message: \"Leitstand KI-Endpunkt erreichbar\" }) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-test",
+      "name": "Respond Test OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract action + context from webhook body\nconst body = $input.first().json.body;\nreturn { json: { action: body.action || 'unknown', context: body.context || {} } };"
+      },
+      "id": "extract-ctx",
+      "name": "Extract Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: decompose_task\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Aufgabenzerlegung (WBS)\\nZerlege die beschriebene Aufgabe/das Projekt in konkrete Arbeitspakete nach der WBS-Methodik.\\n\\nRegeln:\\n- 100%-Regel: Die AP muessen den gesamten Scope abdecken\\n- 8/80-Regel: Jedes AP zwischen 8-80 Stunden\\n- Ergebnisorientiert formulieren (Deliverable, nicht Taetigkeit)\\n- Rolling Wave: Naechste 4-6 Wochen detailliert, danach nur Meilensteine\\n- Bei BSI-Bausteinen: Gruppiere nach Anforderungslevel (Basis zuerst, dann Standard, dann Erhoeht)\\n- Typische AP-Typen pro BSI-Baustein: Richtlinie/Konzept erstellen, Ist-Aufnahme, Gap-Analyse, Massnahmen umsetzen, Schulung, Audit-Nachweise, Review/Freigabe\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"arbeitspakete\": [\\n    {\\n      \"titel\": \"<Ergebnis-formulierter Titel>\",\\n      \"beschreibung\": \"<Was genau ist das Ergebnis?>\",\\n      \"ergebnis\": \"<Konkretes Deliverable>\",\\n      \"aufwand_h\": <Zahl 8-80>,\\n      \"tags\": [\"<relevant>\"],\\n      \"empfehlung_person\": \"<Person-Kuerzel falls passend oder leer>\",\\n      \"delegationslevel\": \"<anweisen|beraten|befragen|einigen|delegieren>\",\\n      \"reihenfolge\": <1-basiert>\\n    }\\n  ],\\n  \"hinweise\": \"<Optionale Hinweise zur Zerlegung>\"\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Zerlege folgendes Projekt/Aufgabe in Arbeitspakete:\\n\\n';\n      if (ctx.fokus_projekt) msg += 'Projekt: ' + ctx.fokus_projekt.name + '\\n';\n      if (ctx.fokus_projekt?.vorgehensweise) msg += 'BSI-Vorgehensweise: ' + ctx.fokus_projekt.vorgehensweise + '\\n';\n      if (ctx.fokus_aps?.length) {\n        msg += '\\nBereits vorhandene AP:\\n';\n        ctx.fokus_aps.forEach(a => { msg += '- ' + a.titel + ' (Status: ' + a.status + ', Aufwand: ' + (a.aufwand_h || '?') + 'h)\\n'; });\n        msg += '\\nIdentifiziere FEHLENDE AP die noch nicht abgedeckt sind.\\n';\n      } else {\n        msg += '\\nNoch keine AP vorhanden. Erstelle eine vollstaendige Zerlegung.\\n';\n      }\n      if (ctx.personen?.length) {\n        msg += '\\nVerfuegbare Personen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + ' (Schwerpunkte: ' + (p.schwerpunkte || []).join(', ') + ', Verfuegbarkeit: ' + p.verfuegbarkeit + ')\\n'; });\n      }\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'decompose_task', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-decompose_task",
+      "name": "Prompt: decompose_task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: suggest_delegation\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Delegationsvorschlaege\\nSchlage fuer offene Arbeitspakete passende Personen und Delegationslevel vor.\\n\\nRegeln:\\n- Matche Schwerpunkte der Person mit AP-Inhalt\\n- Beruecksichtige Verfuegbarkeit und aktuelle Auslastung\\n- Waehle das Delegationslevel passend zur Erfahrung der Person und Komplexitaet der Aufgabe\\n- Formuliere einen Copy-Paste-fertigen Delegationstext passend zum Level:\\n  - Anweisen: Direkt, klar, mit konkreter Vorgabe\\n  - Beraten: Erklaerend, mit Kontext warum\\n  - Befragen: Fragend, Input einholend\\n  - Einigen: Partnerschaftlich, gemeinsam entscheidend\\n  - Delegieren: Vertrauend, nur Ergebnis definierend\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"zuweisungen\": [\\n    {\\n      \"arbeitspaket_id\": \"<ID des AP>\",\\n      \"empfohlene_person_id\": \"<Name/Kuerzel der Person>\",\\n      \"delegationslevel\": \"<anweisen|beraten|befragen|einigen|delegieren>\",\\n      \"begruendung\": \"<Warum diese Person und dieses Level?>\",\\n      \"delegations_text\": \"<Fertiger Text zum Kopieren, Anrede mit Vornamen>\"\\n    }\\n  ]\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Schlage Delegationen vor fuer folgende offene AP:\\n\\n';\n      const aps = (ctx.fokus_aps || ctx.arbeitspakete || []).filter(a => a.status !== 'erledigt' && !a.verantwortlicher_id);\n      if (!aps.length) return 'Keine offenen, nicht zugewiesenen AP gefunden.';\n      aps.forEach(a => { msg += '- ID: ' + a.id + ' | ' + a.titel + ' | Aufwand: ' + (a.aufwand_h || '?') + 'h | Prio: ' + a.prioritaet + '\\n'; });\n      if (ctx.personen?.length) {\n        msg += '\\nVerfuegbare Personen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + ' | Schwerpunkte: ' + (p.schwerpunkte || []).join(', ') + ' | Verfuegbarkeit: ' + p.verfuegbarkeit + ' | Offene AP: ' + (ctx.arbeitspakete || []).filter(a => a.verantwortlicher_id === p.id && a.status !== 'erledigt').length + '\\n'; });\n      }\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'suggest_delegation', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-suggest_delegation",
+      "name": "Prompt: suggest_delegation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: prioritize\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Priorisierung\\nBewerte die offenen Arbeitspakete nach der Eisenhower-Matrix und dem kritischen Pfad.\\n\\nRegeln:\\n- Ordne jedes AP einem Eisenhower-Quadranten zu\\n- Beruecksichtige: Deadline-Naehe, Prioritaet, Abhaengigkeiten, Projektrolle\\n- Gib eine kurze Zusammenfassung: Was sollte HEUTE angegangen werden?\\n- Identifiziere AP die delegierbar sind (dringend aber nicht wichtig)\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"zusammenfassung\": \"<2-3 Saetze: Was ist heute am wichtigsten?>\",\\n  \"empfehlungen\": [\\n    {\\n      \"arbeitspaket_id\": \"<ID>\",\\n      \"eisenhower_quadrant\": \"<Dringend & Wichtig|Wichtig, nicht dringend|Dringend, nicht wichtig|Weder noch>\",\\n      \"dringlichkeit\": \"<sofort|diese_woche|naechste_woche|spaeter>\",\\n      \"begruendung\": \"<Kurze Begruendung>\"\\n    }\\n  ]\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '. Priorisiere folgende offene AP:\\n\\n';\n      const aps = (ctx.arbeitspakete || []).filter(a => a.status !== 'erledigt');\n      if (!aps.length) return 'Keine offenen AP vorhanden.';\n      aps.forEach(a => {\n        msg += '- ID: ' + a.id + ' | ' + a.titel + ' | Prio: ' + a.prioritaet + ' | Deadline: ' + (a.deadline || 'keine') + ' | Status: ' + a.status;\n        if (a.verantwortlicher_id) msg += ' | Verantw: ' + a.verantwortlicher_id;\n        msg += '\\n';\n      });\n      if (ctx.meilensteine?.length) {\n        msg += '\\nAnstehende Meilensteine:\\n';\n        ctx.meilensteine.forEach(m => { msg += '- ' + m.titel + ' | Datum: ' + m.datum + ' | Status: ' + m.status + '\\n'; });\n      }\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'prioritize', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-prioritize",
+      "name": "Prompt: prioritize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: weekly_summary\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Wochenzusammenfassung\\nErstelle eine kompakte Zusammenfassung der Projektsituation.\\n\\nRegeln:\\n- Fasse den Gesamtstatus ueber alle Projekte zusammen\\n- Hebe Erfolge hervor (erledigte AP)\\n- Identifiziere Risiken und Blocker\\n- Gib 3-5 konkrete Empfehlungen fuer naechste Woche\\n- Schreibe in einem Ton der motiviert aber ehrlich ist\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"zusammenfassung\": \"<3-5 Saetze Gesamtbild>\",\\n  \"risiken\": [\"<Risiko 1>\", \"<Risiko 2>\"],\\n  \"naechste_woche\": [\"<Empfehlung 1>\", \"<Empfehlung 2>\"]\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '. Erstelle eine Wochenzusammenfassung.\\n\\n';\n      msg += 'Projekte: ' + (ctx.projekte || []).length + ' aktiv\\n';\n      const aps = ctx.arbeitspakete || [];\n      const erledigt = aps.filter(a => a.status === 'erledigt').length;\n      const offen = aps.filter(a => a.status !== 'erledigt').length;\n      msg += 'AP: ' + erledigt + ' erledigt, ' + offen + ' offen\\n\\n';\n      if (ctx.projekte?.length) {\n        msg += 'Projektdetails:\\n';\n        ctx.projekte.forEach(p => {\n          const pAps = aps.filter(a => a.projekt_id === p.id);\n          msg += '- ' + p.name + ': ' + pAps.filter(a => a.status === 'erledigt').length + '/' + pAps.length + ' AP erledigt, Prio: ' + p.prioritaet + '\\n';\n        });\n      }\n      if (ctx.meilensteine?.length) {\n        msg += '\\nMeilensteine:\\n';\n        ctx.meilensteine.forEach(m => { msg += '- ' + m.titel + ' | ' + m.datum + ' | ' + m.status + '\\n'; });\n      }\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'weekly_summary', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-weekly_summary",
+      "name": "Prompt: weekly_summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: parse_transcript\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Meeting-Transkript auswerten\\nAnalysiere das Meeting-Transkript und extrahiere strukturierte Informationen.\\n\\nRegeln:\\n- Extrahiere ALLE Arbeitspakete die besprochen/vereinbart wurden\\n- Formuliere AP als Deliverables (Ergebnis, nicht Taetigkeit)\\n- Extrahiere Entscheidungen die getroffen wurden\\n- Identifiziere Risiken die erwaehnt wurden\\n- Extrahiere Follow-ups (\"X klaert bis Freitag\", \"Y prueft\")\\n- Schaetze Aufwand realistisch (8/80-Regel)\\n- ACHTUNG: Transkripte koennen kundenbezogene Daten enthalten. Deine Antwort wird nur lokal verarbeitet.\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"arbeitspakete\": [\\n    { \"titel\": \"<Deliverable>\", \"beschreibung\": \"<Kontext aus Meeting>\", \"aufwand_h\": <8-80>, \"prioritaet\": \"<kritisch|hoch|mittel|niedrig>\" }\\n  ],\\n  \"entscheidungen\": [\\n    { \"titel\": \"<Entscheidung>\", \"beschreibung\": \"<Begruendung/Kontext>\" }\\n  ],\\n  \"risiken\": [\\n    { \"titel\": \"<Risikobeschreibung>\", \"wahrscheinlichkeit\": \"<niedrig|mittel|hoch>\", \"auswirkung\": \"<niedrig|mittel|hoch>\" }\\n  ],\\n  \"follow_ups\": [\\n    { \"text\": \"<Was ist zu tun?>\", \"person\": \"<Wer?>\", \"deadline\": \"<Wann? ISO-Datum wenn moeglich>\" }\\n  ]\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = '';\n      if (ctx.projekt) msg += 'Projekt: ' + ctx.projekt.name + '\\n\\n';\n      msg += 'Meeting-Transkript:\\n---\\n' + (ctx.transcript || '(kein Transkript)') + '\\n---\\n';\n      msg += '\\nExtrahiere alle Arbeitspakete, Entscheidungen, Risiken und Follow-ups aus diesem Transkript.';\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'parse_transcript', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-parse_transcript",
+      "name": "Prompt: parse_transcript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: execute_commands\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Natuerliche Sprache in Projekt-Kommandos umwandeln\nDer Nutzer beschreibt in natuerlicher Sprache was im Projekt passieren soll.\nInterpretiere den Text und erzeuge strukturierte Kommandos.\n\nMoegliche Kommandos:\n- create_ap: Neues Arbeitspaket anlegen (titel, beschreibung, aufwand_h, prioritaet, deadline, verantwortlicher_ref)\n- update_ap: Bestehendes AP aendern (ap_ref als Titelsuche, status, deadline, aufwand_h, verantwortlicher_ref)\n- create_person: Neue Person anlegen (name, kuerzel, schwerpunkte, email)\n- create_milestone: Neuen Meilenstein (titel, datum)\n- create_note: Notiz/Entscheidung/Risiko anlegen (typ, text)\n- create_risk: Risiko erfassen (titel, wahrscheinlichkeit, auswirkung, massnahme)\n- update_projekt: Projekt-Felder aendern (status, prioritaet, deadline)\n- draft_email: E-Mail-Entwurf erstellen (empfaenger_ref, anlass: status_update|terminverschiebung|eskalation|nachfrage)\n\nRegeln:\n- Interpretiere grosszuegig \u2014 der Nutzer schreibt/spricht umgangssprachlich\n- Bei AP-Referenzen: Suche nach aehnlichen Titeln in den bestehenden AP\n- Bei Personen-Referenzen: Matche Name oder Kuerzel\n- Formuliere AP-Titel als Deliverables\n- WICHTIG: \\\"ich\\\", \\\"mir\\\", \\\"mein\\\" bezieht sich auf den Nutzer (siehe ctx.ich im User-Prompt). Weise AP an dessen Person-ID zu.\\n- Wenn unklar, frage NICHT nach \u2014 mache den bestmoeglichen Vorschlag\n\nAntwortformat (STRIKT JSON):\n{\n  \"commands\": [\n    { \"action\": \"<command_type>\", \"data\": { <fields> }, \"begruendung\": \"<was du interpretiert hast>\" }\n  ],\n  \"zusammenfassung\": \"<Kurze Zusammenfassung was du interpretiert und vorgeschlagen hast>\"\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '.\\n';\n      if (ctx.fokus_projekt) msg += 'Projekt: ' + ctx.fokus_projekt.name + '\\n';\n    if (ctx.ich) msg += 'Der Nutzer (\"ich\") ist: ' + ctx.ich.name + (ctx.ich.id ? ' (ID: ' + ctx.ich.id + ')' : '') + '. Wenn der Nutzer \"ich muss\" oder \"ich\" sagt, ist diese Person gemeint.\\n';\n      if (ctx.fokus_aps && ctx.fokus_aps.length) {\n        msg += '\\nBestehende AP:\\n';\n        ctx.fokus_aps.forEach(a => { msg += '- ' + a.titel + ' (Status: ' + a.status + ', Verantw: ' + (a.verantwortlicher_id || 'ich') + ')\\n'; });\n      }\n      if (ctx.personen && ctx.personen.length) {\n        msg += '\\nBekannte Personen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + ' (' + (p.schwerpunkte||[]).join(', ') + ')\\n'; });\n      }\n      msg += '\\nNutzereingabe:\\n' + (ctx.user_text || '');\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'execute_commands', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-execute_commands",
+      "name": "Prompt: execute_commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: draft_email\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: E-Mail entwerfen\\nErstelle eine professionelle E-Mail basierend auf dem Projektkontext.\\n\\nRegeln:\\n- Professionell aber nicht steif\\n- Verwende die Anrede der Zielperson (Pseudonym wird nachher durch echten Namen ersetzt)\\n- Beziehe dich auf konkrete Projektereignisse (offene AP, Meilensteine, Risiken)\\n- KEINE kundenbezogenen Daten erfinden \u2014 nutze nur was im Kontext steht\\n- Biete verschiedene Tonalitaeten an wenn sinnvoll\\n\\nAntwortformat (STRIKT JSON):\\n{ \"betreff\": \"<Betreffzeile>\", \"empfaenger\": \"<Person-Pseudonym>\", \"text\": \"<Vollstaendiger E-Mail-Text>\", \"hinweise\": \"<Optionale Hinweise zum Anpassen>\" }`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '.\\n';\n      if (ctx.fokus_projekt) msg += 'Projekt: ' + ctx.fokus_projekt.name + '\\n';\n      const aps = (ctx.fokus_aps || ctx.arbeitspakete || []).filter(a => a.status !== 'erledigt');\n      if (aps.length) {\n        msg += '\\nOffene AP:\\n';\n        aps.forEach(a => { msg += '- ' + a.titel + ' | Status: ' + a.status + ' | Deadline: ' + (a.deadline || 'keine') + '\\n'; });\n      }\n      if (ctx.meilensteine?.length) {\n        msg += '\\nMeilensteine:\\n';\n        ctx.meilensteine.forEach(m => { msg += '- ' + m.titel + ' | ' + m.datum + ' | ' + m.status + '\\n'; });\n      }\n      if (ctx.personen?.length) {\n        msg += '\\nVerfuegbare Kundenansprechpartner/Personen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + (p.rolle ? ' (Rolle: ' + p.rolle + ')' : '') + '\\n'; });\n      }\n      msg += '\\nErstelle einen E-Mail-Entwurf fuer dieses Projekt.';\n      if (ctx.anlass) msg += ' Anlass: ' + ctx.anlass;\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'draft_email', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-draft_email",
+      "name": "Prompt: draft_email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: draft_followup\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Nachfass-Text schreiben\\nErstelle einen freundlichen aber bestimmten Nachfass-Text fuer ueberfaellige oder nicht reagierte Delegationen.\\n\\nRegeln:\\n- Tonalitaet passend zum Delegationslevel (Anweisen=direkt, Delegieren=partnerschaftlich)\\n- Konkret: Was wurde wann delegiert, was fehlt noch\\n- Nicht vorwurfsvoll, loesungsorientiert\\n- Frist setzen\\n\\nAntwortformat (STRIKT JSON):\\n{ \"empfaenger\": \"<Person-Pseudonym>\", \"text\": \"<Nachfass-Text>\", \"kontext\": \"<Was war der urspruengliche Auftrag>\" }`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '.\\n';\n      if (ctx.fokus_projekt) msg += 'Projekt: ' + ctx.fokus_projekt.name + '\\n';\n      const aps = (ctx.fokus_aps || ctx.arbeitspakete || []).filter(a => (a.status === 'delegiert' || a.status === 'offen') && a.verantwortlicher_id);\n      if (aps.length) {\n        msg += '\\nUeberfaellige/offene delegierte AP:\\n';\n        aps.forEach(a => { msg += '- ' + a.titel + ' | Verantw: ' + (a.verantwortlicher_id || '?') + ' | Deadline: ' + (a.deadline || 'keine') + ' | Level: ' + (a.delegationslevel || '?') + '\\n'; });\n      }\n      if (ctx.personen?.length) {\n        msg += '\\nPersonen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + '\\n'; });\n      }\n      msg += '\\nSchreibe einen Nachfass-Text fuer die ueberfaelligen Delegationen.';\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'draft_followup', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-draft_followup",
+      "name": "Prompt: draft_followup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: prepare_meeting\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Meeting vorbereiten\\nErstelle eine Agenda und Talking Points fuer ein bevorstehendes Meeting.\\n\\nRegeln:\\n- Basiere auf offenen AP, Meilensteinen, Risiken des Projekts\\n- Priorisiere: Was MUSS besprochen werden vs nice-to-have\\n- Identifiziere offene Fragen die geklaert werden muessen\\n- Nenne Risiken die angesprochen werden sollten\\n\\nAntwortformat (STRIKT JSON):\\n{ \"agenda\": [{ \"titel\": \"<TOP>\", \"punkte\": [\"<Punkt>\"] }], \"talking_points\": [\"<Punkt>\"], \"offene_fragen\": [\"<Frage>\"], \"risiken_ansprechen\": [\"<Risiko>\"] }`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '.\\n';\n      if (ctx.fokus_projekt) msg += 'Projekt: ' + ctx.fokus_projekt.name + '\\n';\n      const aps = (ctx.fokus_aps || ctx.arbeitspakete || []).filter(a => a.status !== 'erledigt');\n      if (aps.length) {\n        msg += '\\nOffene AP:\\n';\n        aps.forEach(a => { msg += '- ' + a.titel + ' | Status: ' + a.status + ' | Prio: ' + a.prioritaet + ' | Deadline: ' + (a.deadline || 'keine') + '\\n'; });\n      }\n      if (ctx.meilensteine?.length) {\n        msg += '\\nMeilensteine:\\n';\n        ctx.meilensteine.forEach(m => { msg += '- ' + m.titel + ' | ' + m.datum + ' | ' + m.status + '\\n'; });\n      }\n      if (ctx.personen?.length) {\n        msg += '\\nTeilnehmer/Personen:\\n';\n        ctx.personen.forEach(p => { msg += '- ' + p.name + (p.rolle ? ' (' + p.rolle + ')' : '') + '\\n'; });\n      }\n      msg += '\\nErstelle eine Meeting-Agenda mit Talking Points, offenen Fragen und Risiken.';\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'prepare_meeting', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-prepare_meeting",
+      "name": "Prompt: prepare_meeting",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userPrompt }}",
+        "options": {
+          "systemMessage": "={{ $json.systemPrompt }}"
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1168,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.3
+        }
+      },
+      "id": "anthropic",
+      "name": "Anthropic Claude Haiku",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        720
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "00YNscU5o1I1zncN",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI output to JSON\nconst input = $input.first().json;\nlet aiOutput = input.output || input.text || '';\nlet parsed = null;\ntry { parsed = JSON.parse(aiOutput); } catch (e) {\n  const jsonMatch = aiOutput.match(/```json\\s*([\\s\\S]*?)\\s*```/) || aiOutput.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) { try { parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]); } catch (e2) {\n    try { let fixed = (jsonMatch[1] || jsonMatch[0]).replace(/,\\s*}/g, '}').replace(/,\\s*]/g, ']'); parsed = JSON.parse(fixed); } catch (e3) {} } }\n}\nif (parsed) return { json: parsed };\nreturn { json: { zusammenfassung: aiOutput, _raw: true } };"
+      },
+      "id": "formatter",
+      "name": "Response Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization, Accept"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1600,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt: prioritize\nconst input = $input.first().json;\nconst ctx = input.context;\nconst BASE_SYSTEM = `Du bist ein KI-Assistent fuer IT-Sicherheitsberater und Projektleiter.\nDu hilfst bei der Steuerung von 10-20 parallelen Projekten im Bereich BSI IT-Grundschutz, ISMS und IT-Audits.\n\nDein Wissen umfasst:\n\n## BSI IT-Grundschutz\n\n### BSI-Standard 200-1: ISMS\n- PDCA-Zyklus als kontinuierlicher Prozess, kein einmaliges Projekt\n  - Plan: Risikoanalysen, Assets/Bedrohungen/Massnahmen dokumentieren, Sicherheitsstrategie an Schutzbedarfen ausrichten\n  - Do: Massnahmen umsetzen (organisatorisch, technisch, personell), klare Verantwortlichkeiten mit Deadlines\n  - Check: Management-Reviews mit messbaren Zielen, interne Audits zur Wirksamkeitspruefung\n  - Act: Nichtkonformitaeten systematisch beheben, Prozesse anpassen\n- Sicherheitsleitlinie muss enthalten: Stellenwert der InfoSec, Bezug zu Geschaeftszielen, Sicherheitsziele, Zusicherung der Durchsetzung, Organisationsstruktur\n- Management: Strategische Ausrichtung + Ressourcen-Governance + Integrationsaufsicht (ISB, Datenschutz, Fachabteilungen, Audit)\n\n### BSI-Standard 200-2: IT-Grundschutz-Methodik\n- Drei Vorgehensweisen:\n  - Basis-Absicherung: Nur MUSS-Anforderungen, Einstieg, NICHT zertifizierbar\n  - Standard-Absicherung: Vollstaendig, zertifizierbar (ISO 27001 auf Basis IT-Grundschutz)\n  - Kern-Absicherung: Nur Kronjuwelen, zertifizierbar\n- Phasen: Strukturanalyse > Schutzbedarfsfeststellung > Modellierung > IT-Grundschutz-Check > Risikoanalyse\n- Strukturanalyse erfasst: Geschaeftsprozesse, Anwendungen, IT-Systeme, Kommunikationsverbindungen, Raeume/Gebaeude\n- Schutzbedarfsfeststellung (Vertraulichkeit, Integritaet, Verfuegbarkeit):\n  - normal (begrenzter Schaden), hoch (betraechtlich), sehr hoch (existenzbedrohend)\n  - Maximumprinzip: Anwendung mit hoechstem Schutzbedarf bestimmt den des IT-Systems\n  - Kumulationseffekt: Mehrere normal-Anwendungen auf einem Server koennen zu hoch fuehren\n  - Verteilungseffekt: Redundante Verteilung kann Schutzbedarf einzelner Systeme senken\n- 10 Baustein-Schichten: ISMS, ORP, CON, OPS, DER (prozessorientiert) + APP, SYS, IND, NET, INF (systemorientiert)\n- Anforderungstypen: MUSS (Basis, Pflicht), SOLLTE (Standard), Erhoeht\n- IT-Grundschutz-Check: Soll-Ist-Vergleich, Status ja/teilweise/nein/entbehrlich, alle 2 Jahre wiederholen\n\n### BSI-Standard 200-3: Risikoanalyse\n- Ausgeloest bei Schutzbedarf hoch/sehr hoch oder wenn Bausteine nicht ausreichend\n- 4-Schritt-Verfahren:\n  1. Gefaehrdungsuebersicht: 47 elementare Gefaehrdungen (G 0.1-G 0.47) + organisationsspezifische\n  2. Risikoeinstufung: Eintrittshaeufigkeit (unwahrscheinlich bis sehr wahrscheinlich) x Schadenshoehe (vernachlaessigbar bis existenzbedrohend) = gering/mittel/hoch\n  3. Risikobehandlung: Vermeidung (Exposure eliminieren) | Reduzierung (zusaetzliche Controls) | Uebertragung (Versicherung/SLA) | Akzeptanz (Management-Entscheidung dokumentiert)\n  4. Konsolidierung ins Sicherheitskonzept mit Realisierungsplan\n\n## Projektmanagement-Methodik\n- Work Breakdown Structure (WBS, PMBOK Guide / ISO 21500):\n  - 100%-Regel: WBS muss 100% des Scopes abdecken\n  - 8/80-Regel: Jedes AP zwischen 8-80 Stunden\n  - Gegenseitige Ausschliesslichkeit: Keine Ueberlappung zwischen AP\n  - Ergebnisorientiert: Deliverables, nicht Taetigkeiten\n  - Rolling Wave Planning: 2-3 Monate voraus detailliert planen, danach Planning Packages als Platzhalter\n\n- Delegation (Management 3.0, Jurgen Appelo):\n  - Anweisen: Entscheidung getroffen, keine Diskussion\n  - Beraten: Entscheidung mit Erklaerung warum\n  - Befragen: Input einholen, dann selbst entscheiden\n  - Einigen: Konsens-Entscheidung gemeinsam treffen\n  - Delegieren: Volle Autonomie, nur Ergebnis definieren\n- RACI-Matrix: Responsible (fuehrt aus, mehrere moeglich), Accountable (verantwortet, NUR EINER pro AP), Consulted (wird befragt, 2-Wege), Informed (wird informiert, 1-Weg)\n\n- Eisenhower-Matrix:\n  - Dringend + Wichtig: Sofort selbst erledigen\n  - Wichtig, nicht dringend: Terminieren\n  - Dringend, nicht wichtig: DELEGIEREN (groesstes Potenzial!)\n  - Weder noch: Eliminieren\n\n## Audit-Methodik (4 Phasen)\n1. Planung: Scope, Ziele, Vorab-Daten (Richtlinien, Vorfaelle), Auditprogramm\n2. Feldarbeit: Tests of Design + Tests of Effectiveness, Nachweise: Beobachtung > Dokumente > muendlich\n3. Bericht: Finding = Beschreibung + Ursache + Auswirkung + Empfehlung, Klassen: Hauptabweichung/Nebenabweichung/Empfehlung/Beobachtung\n4. Nachverfolgung: Umsetzung pruefen, Wirksamkeit verifizieren, Monitoring etablieren\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme (\"Projekt A\"), Personen sind Kuerzel (\"Person CM\").\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.\\``;\n\nconst systemPrompt = BASE_SYSTEM + `\\n\\n## Deine Aufgabe: Priorisierung\\nBewerte die offenen Arbeitspakete nach der Eisenhower-Matrix und dem kritischen Pfad.\\n\\nRegeln:\\n- Ordne jedes AP einem Eisenhower-Quadranten zu\\n- Beruecksichtige: Deadline-Naehe, Prioritaet, Abhaengigkeiten, Projektrolle\\n- Gib eine kurze Zusammenfassung: Was sollte HEUTE angegangen werden?\\n- Identifiziere AP die delegierbar sind (dringend aber nicht wichtig)\\n\\nAntwortformat (STRIKT JSON):\\n{\\n  \"zusammenfassung\": \"<2-3 Saetze: Was ist heute am wichtigsten?>\",\\n  \"empfehlungen\": [\\n    {\\n      \"arbeitspaket_id\": \"<ID>\",\\n      \"eisenhower_quadrant\": \"<Dringend & Wichtig|Wichtig, nicht dringend|Dringend, nicht wichtig|Weder noch>\",\\n      \"dringlichkeit\": \"<sofort|diese_woche|naechste_woche|spaeter>\",\\n      \"begruendung\": \"<Kurze Begruendung>\"\\n    }\\n  ]\\n}`;\n\nconst userPrompt = (function(ctx) {\n      let msg = 'Heute ist ' + ctx.heute + '. Priorisiere folgende offene AP:\\n\\n';\n      const aps = (ctx.arbeitspakete || []).filter(a => a.status !== 'erledigt');\n      if (!aps.length) return 'Keine offenen AP vorhanden.';\n      aps.forEach(a => {\n        msg += '- ID: ' + a.id + ' | ' + a.titel + ' | Prio: ' + a.prioritaet + ' | Deadline: ' + (a.deadline || 'keine') + ' | Status: ' + a.status;\n        if (a.verantwortlicher_id) msg += ' | Verantw: ' + a.verantwortlicher_id;\n        msg += '\\n';\n      });\n      if (ctx.meilensteine?.length) {\n        msg += '\\nAnstehende Meilensteine:\\n';\n        ctx.meilensteine.forEach(m => { msg += '- ' + m.titel + ' | Datum: ' + m.datum + ' | Status: ' + m.status + '\\n'; });\n      }\n      return msg;\n    })(ctx);\n\nreturn { json: { action: 'plan_day', systemPrompt: systemPrompt, userPrompt: userPrompt, context: ctx } };"
+      },
+      "id": "prompt-plan_day",
+      "name": "Prompt: plan_day",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "draft_email",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "draft_followup",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c3",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "prepare_meeting",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c4",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "plan_day",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "router-1",
+      "name": "Comm or Core?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        576,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "decompose_task",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "decompose_task"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "suggest_delegation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "suggest_delegation"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "prioritize",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "prioritize"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "weekly_summary",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "weekly_summary"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "parse_transcript",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "parse_transcript"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "execute_commands",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "execute_commands"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-core",
+      "name": "Switch Core",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        776,
+        264
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "draft_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "draft_email"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "draft_followup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "draft_followup"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "prepare_meeting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "prepare_meeting"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "plan_day",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "plan_day"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-comm",
+      "name": "Switch Comm",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        776,
+        664
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "IF Test?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Test?": {
+      "main": [
+        [
+          {
+            "node": "Respond Test OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Context": {
+      "main": [
+        [
+          {
+            "node": "Comm or Core?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: decompose_task": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: suggest_delegation": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: prioritize": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: weekly_summary": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: parse_transcript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: execute_commands": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: draft_email": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: draft_followup": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: prepare_meeting": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Claude Haiku": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt: plan_day": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comm or Core?": {
+      "main": [
+        [
+          {
+            "node": "Switch Comm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch Core",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Core": {
+      "main": [
+        [
+          {
+            "node": "Prompt: decompose_task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: suggest_delegation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: prioritize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: weekly_summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: parse_transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: execute_commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Comm": {
+      "main": [
+        [
+          {
+            "node": "Prompt: draft_email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: draft_followup",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: prepare_meeting",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt: plan_day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  }
+}
