@@ -1,0 +1,189 @@
+{
+  "name": "TEST_HTML_Leitstand_AP_Assistent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leitstand-ap-assistent",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-ap",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        480
+      ],
+      "webhookId": "leitstand-ap-assistent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Prompt from conversation + context\nconst body = $input.first().json.body;\nconst conversation = body.conversation || [];\nconst context = body.context || {};\n\nconst systemPrompt = `Du bist ein AP-Assistent fuer IT-Sicherheitsberater. Deine Aufgabe ist es, aus Sachverhaltsschilderungen vollstaendig definierte Arbeitspakete zu erstellen.\n\nGESPRAECHSREGELN:\n- Wenn der Sachverhalt KLAR ist und du alle Infos hast: Erstelle sofort AP-Vorschlaege\n- Wenn UNKLAR: Stelle maximal 3 gezielte Rueckfragen BEVOR du AP erstellst\n- Fragen muessen KONKRET sein, nicht allgemein (\"Wie viele Server?\" statt \"Kannst du mehr erzaehlen?\")\n- Biete bei Fragen Antwort-Optionen an wenn sinnvoll\n- Nach Antworten: Erstelle die AP oder stelle Folgefragen\n- NIEMALS mehr als 2 Frage-Runden — danach musst du AP liefern, auch wenn unsicher\n\nAP-QUALITAET:\n- Titel als Deliverable formuliert (\"Richtlinie ORP.1 erstellt\" nicht \"An Richtlinie arbeiten\")\n- 8/80-Regel: 8-80 Stunden pro AP\n- Jedes AP: titel, beschreibung, ergebnis, aufwand_h, prioritaet, tags\n- Bei BSI-Bausteinen: Nach Anforderungslevel gruppieren (Basis zuerst)\n- Abhaengigkeiten zwischen AP benennen wenn vorhanden\n\nANTWORTFORMAT (STRIKT JSON):\n{\n  \"type\": \"questions\" | \"proposals\" | \"mixed\",\n  \"text\": \"<Optionaler Einleitungstext>\",\n  \"questions\": [\n    { \"id\": \"q1\", \"text\": \"<Konkrete Frage>\", \"options\": [\"Option A\", \"Option B\"] }\n  ],\n  \"arbeitspakete\": [\n    {\n      \"titel\": \"<Deliverable>\",\n      \"beschreibung\": \"<Was genau>\",\n      \"ergebnis\": \"<Konkretes Ergebnis>\",\n      \"aufwand_h\": <8-80>,\n      \"prioritaet\": \"kritisch|hoch|mittel|niedrig\",\n      \"tags\": [\"<tag>\"],\n      \"empfehlung_person\": \"<Person falls passend>\",\n      \"abhaengig_von\": \"<Anderes AP-Titel falls relevant>\"\n    }\n  ],\n  \"hinweise\": \"<Optionale Anmerkungen>\"\n}\n\n- \"questions\": Nur Fragen, keine AP\n- \"proposals\": Nur AP-Vorschlaege\n- \"mixed\": Einige AP schon klar, aber Fragen zu weiteren Aspekten\n\nWICHTIG:\n- Alle Daten die du erhaeltst sind ANONYMISIERT. Projektnamen sind Pseudonyme, Personen sind Kuerzel.\n- Antworte IMMER auf Deutsch.\n- Antworte IMMER im geforderten JSON-Format.\n- Formuliere Arbeitspakete als Deliverables/Ergebnisse, nicht als Taetigkeiten.\n- Beachte die 8/80-Regel: Empfehle AP zwischen 8 und 80 Stunden.`;\n\n// Build user prompt from conversation history + context\nlet userPrompt = '';\n\nif (context.projekt) {\n  userPrompt += 'Projekt: ' + (context.projekt.name || 'Unbekannt');\n  if (context.projekt.vorgehensweise) userPrompt += ' (BSI ' + context.projekt.vorgehensweise + ')';\n  userPrompt += '\\n';\n}\n\nif (context.vorhandene_aps && context.vorhandene_aps.length) {\n  userPrompt += '\\nBereits vorhandene AP (' + context.vorhandene_aps.length + '):\\n';\n  context.vorhandene_aps.slice(0, 20).forEach(function(a) {\n    userPrompt += '- ' + a.titel + ' (Status: ' + a.status + ', ' + (a.aufwand_h || '?') + 'h)\\n';\n  });\n}\n\nif (context.personen && context.personen.length) {\n  userPrompt += '\\nVerfuegbare Personen:\\n';\n  context.personen.forEach(function(p) {\n    userPrompt += '- ' + p.name + ' (' + (p.schwerpunkte || []).join(', ') + ')\\n';\n  });\n}\n\nuserPrompt += '\\nHeute: ' + (context.heute || new Date().toISOString().slice(0, 10)) + '\\n';\n\nuserPrompt += '\\n--- GESPRAECHSVERLAUF ---\\n';\nconversation.forEach(function(msg) {\n  userPrompt += (msg.role === 'user' ? 'NUTZER' : 'ASSISTENT') + ': ' + msg.content + '\\n';\n});\n\nuserPrompt += '\\nBitte antworte dem Nutzer basierend auf dem Gespraechsverlauf.';\n\nreturn { json: { systemPrompt: systemPrompt, userPrompt: userPrompt } };"
+      },
+      "id": "build-prompt",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userPrompt }}",
+        "options": {
+          "systemMessage": "={{ $json.systemPrompt }}"
+        }
+      },
+      "id": "ai-agent-ap",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.4
+        }
+      },
+      "id": "anthropic-ap",
+      "name": "Anthropic Claude Haiku",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        688
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "00YNscU5o1I1zncN",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI output to JSON\nconst input = $input.first().json;\nlet aiOutput = input.output || input.text || '';\nlet parsed = null;\ntry { parsed = JSON.parse(aiOutput); } catch (e) {\n  const jsonMatch = aiOutput.match(/```json\\s*([\\s\\S]*?)\\s*```/) || aiOutput.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) { try { parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]); } catch (e2) {\n    try { let fixed = (jsonMatch[1] || jsonMatch[0]).replace(/,\\s*}/g, '}').replace(/,\\s*]/g, ']'); parsed = JSON.parse(fixed); } catch (e3) {} } }\n}\nif (parsed) return { json: parsed };\nreturn { json: { type: 'proposals', text: aiOutput, arbeitspakete: [], questions: [], _raw: true } };"
+      },
+      "id": "formatter-ap",
+      "name": "Response Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        728,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization, Accept"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-ap",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Claude Haiku": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-03-15T00:00:00.000Z",
+  "versionId": "1"
+}

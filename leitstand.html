@@ -320,6 +320,43 @@
       .ki-inline-area .ki-inline-close { float: right; background: none; border: none; cursor: pointer; color: var(--ci-text-muted); font-size: 16px; padding: 0 4px; }
       .ki-inline-area .ki-inline-close:hover { color: var(--ci-text-dark); }
 
+      /* AP-ASSISTENT CHAT */
+      .ap-chat { border: 1px solid var(--ci-border); border-radius: var(--ci-radius-card); background: var(--ci-bg-card-white); overflow: hidden; margin-bottom: var(--spacing-lg); }
+      .ap-chat-header { padding: 10px var(--spacing-md); border-bottom: 1px solid var(--ci-border); display: flex; align-items: center; gap: var(--spacing-xs); background: var(--ci-bg-page); }
+      .ap-chat-header-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; flex: 1; }
+      .ap-chat-header-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #dbeafe; color: #1d4ed8; }
+      .ap-chat-messages { max-height: 500px; overflow-y: auto; padding: var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-md); }
+      .ap-chat-messages:empty::after { content: 'Schildere einen Sachverhalt und ich helfe dir, daraus Arbeitspakete zu schneiden.'; display: block; text-align: center; color: var(--ci-text-muted); font-size: 12px; padding: 32px; font-style: italic; }
+      .ap-chat-msg { animation: chatFadeIn 0.2s ease-out; }
+      @keyframes chatFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      .ap-chat-msg-user { border-left: 3px solid var(--ci-color-brand-dark); padding: 8px 12px; font-size: 12px; color: var(--ci-text-dark); background: var(--ci-bg-page); border-radius: 0 6px 6px 0; }
+      .ap-chat-msg-ai { border-left: 3px solid var(--ci-color-brand-blue); padding: 8px 12px; font-size: 12px; }
+      .ap-chat-msg-ai-text { color: var(--ci-text-dark); line-height: 1.5; margin-bottom: 8px; }
+      .ap-chat-question { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px; font-size: 12px; }
+      .ap-chat-question-text { font-weight: 600; margin-bottom: 6px; }
+      .ap-chat-question-options { display: flex; gap: 6px; flex-wrap: wrap; }
+      .ap-chat-question-opt { padding: 4px 12px; border-radius: var(--ci-radius-button); border: 1px solid var(--ci-border); background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+      .ap-chat-question-opt:hover { border-color: var(--ci-color-brand-blue); color: var(--ci-color-brand-blue); }
+      .ap-chat-ap-card { background: var(--ci-bg-card-white); border: 1px solid var(--ci-border); border-left: 4px solid var(--ci-color-brand-blue); border-radius: 0 var(--ci-radius-input) var(--ci-radius-input) 0; padding: var(--spacing-sm) var(--spacing-md); margin-bottom: 6px; }
+      .ap-chat-ap-card.approved { border-left-color: var(--ci-success); opacity: 0.7; }
+      .ap-chat-ap-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+      .ap-chat-ap-desc { font-size: 11px; color: var(--ci-text-muted); margin-bottom: 6px; line-height: 1.4; }
+      .ap-chat-ap-meta { display: flex; gap: var(--spacing-sm); align-items: center; flex-wrap: wrap; font-size: 11px; }
+      .ap-chat-ap-meta span { font-family: var(--font-mono); }
+      .ap-chat-ap-actions { display: flex; gap: 6px; margin-top: 8px; }
+      .ap-chat-input-area { display: flex; gap: 8px; padding: var(--spacing-sm) var(--spacing-md); border-top: 1px solid var(--ci-border); background: var(--ci-bg-page); align-items: flex-end; }
+      .ap-chat-input { flex: 1; resize: none; border: 1px solid var(--ci-border); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-family: var(--ci-font-family); min-height: 38px; max-height: 120px; background: #fff; }
+      .ap-chat-input:focus { outline: none; border-color: var(--ci-color-brand-blue); box-shadow: 0 0 0 2px rgba(0,85,255,0.08); }
+      .ap-chat-send { background: var(--ci-color-brand-blue); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+      .ap-chat-send:hover { background: var(--ci-color-brand-blue-hover); }
+      .ap-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+      .ap-chat-loading { display: flex; align-items: center; gap: 8px; padding: 12px; color: var(--ci-text-muted); font-size: 11px; }
+      .ap-chat-dots { display: flex; gap: 3px; }
+      .ap-chat-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ci-color-brand-blue); opacity: 0.3; animation: chatDot 1.2s ease-in-out infinite; }
+      .ap-chat-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .ap-chat-dots span:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes chatDot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
       /* RISIKO MATRIX */
       .risiko-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 300px; }
       .risiko-cell { padding: 6px; border-radius: 4px; font-size: 10px; text-align: center; cursor: default; }
@@ -758,6 +795,10 @@
               <div class="field-label">API-Key (optional)</div>
               <input type="text" id="set-ki-key" placeholder="Bearer Token">
             </div>
+            <div class="form-row">
+              <div class="field-label">AP-Assistent Webhook-URL</div>
+              <input type="text" id="set-ap-assistent-url" placeholder="https://...">
+            </div>
           </div>
           <div class="settings-section">
             <h4>BlueAnt Import (CSV)</h4>
@@ -895,6 +936,7 @@
       apFilter: { projekt: '', status: '', person: '', prio: '' },
       icsEvents: [],
       tagDatum: U.today(),
+      apChat: {},
     };
     const Undo = {
       _stack: [],
@@ -908,6 +950,7 @@
     };
     const SETTINGS_DEFAULTS = {
       kiUrl: 'https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ki', kiKey: '',
+      apAssistentUrl: 'https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ap-assistent',
       meinName: '', meinPersonId: '',
       badgeProjekte: 'alle', // 'alle' | 'aktive'
       cockpitProjekte: 'aktive', // 'alle' | 'aktive'
@@ -995,6 +1038,7 @@
       document.getElementById('settings-overlay').classList.add('open');
       document.getElementById('set-ki-url').value = settings.kiUrl || '';
       document.getElementById('set-ki-key').value = U.deobfuscate(settings.kiKey || '');
+      document.getElementById('set-ap-assistent-url').value = settings.apAssistentUrl || '';
       document.getElementById('set-mein-name').value = settings.meinName || '';
       var sel = document.getElementById('set-mein-person');
       sel.innerHTML = '<option value="">(nicht zugeordnet)</option>';
@@ -1013,6 +1057,7 @@
     function saveSettings() {
       settings.kiUrl = document.getElementById('set-ki-url').value.trim();
       settings.kiKey = U.obfuscate(document.getElementById('set-ki-key').value.trim());
+      settings.apAssistentUrl = document.getElementById('set-ap-assistent-url').value.trim();
       settings.meinName = document.getElementById('set-mein-name').value.trim();
       settings.meinPersonId = document.getElementById('set-mein-person').value;
       settings.startView = document.getElementById('set-startView').value;
@@ -1343,6 +1388,9 @@
         '</div>' +
         '<div id="ki-inline-comm" class="ki-inline-area"></div>';
 
+      // AP-Assistent Chat
+      h += renderAPChat(p.id);
+
       // NL Command Bar
       h += '<div class="nl-command-bar">' +
         '<textarea id="nl-command-text" rows="2" placeholder="Was soll passieren? Schreib einfach..." onkeydown="if(event.ctrlKey&&event.key===\'Enter\'){event.preventDefault();sendNLCommand(\'' + escAttr(p.id) + '\')}"></textarea>' +
@@ -1396,7 +1444,7 @@
       // Arbeitspakete
       const aps = Store.arbeitspakete.filter(a => a.projekt_id === p.id).sort((a, b) => berechnePrio(b) - berechnePrio(a));
       h += '<div class="card"><div class="card-header"><strong>Arbeitspakete (' + aps.length + ')</strong><div style="display:flex;gap:6px">' +
-        '<button class="btn btn-secondary btn-xs" onclick="triggerKIInline(\'decompose_task\',{projekt_id:\'' + escAttr(p.id) + '\'},\'ki-inline-detail\')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 014-4z"/></svg> Zerlegen</button>' +
+        '<button class="btn btn-secondary btn-xs" onclick="focusAPChat(\'' + escAttr(p.id) + '\',\'Bitte zerlege dieses Projekt in Arbeitspakete.\')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 014-4z"/></svg> KI: Zerlegen</button>' +
         '<button class="btn btn-secondary btn-xs" onclick="triggerKIInline(\'suggest_delegation\',{projekt_id:\'' + escAttr(p.id) + '\'},\'ki-inline-detail\')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Delegation</button>' +
         '<select style="font-size:10px;padding:4px 8px;border:1px solid var(--ci-border);border-radius:var(--ci-radius-input);background:var(--ci-bg-card-white);cursor:pointer;width:auto" onchange="if(this.value){applyBSITemplate(\'' + escAttr(p.id) + '\',this.value);this.value=\'\'}" title="BSI-Projektvorlage anwenden"><option value="">BSI-Vorlage\u2026</option>' + Object.keys(BSI_TEMPLATES).map(function(k) { return '<option value=\"' + escAttr(k) + '\">' + esc(BSI_TEMPLATES[k].label || k) + ' (' + BSI_TEMPLATES[k].items.length + ' AP)</option>'; }).join('') + '</select>' +
         '<button class="btn btn-primary btn-xs" onclick="openModal(\'arbeitspakete\',null,\'' + escAttr(p.id) + '\')">+ AP</button></div></div>' +
@@ -3281,6 +3329,296 @@
       }
       h += '</div>';
       return h;
+    }
+
+    // ═══════════════════════════════════════════
+    // FEATURE: AP-ASSISTENT (Conversational Chat)
+    // Note: innerHTML usage follows same pattern as existing codebase
+    // (renderProjektdetail, buildKIResultsHTML etc.) with esc() sanitization
+    // ═══════════════════════════════════════════
+    function getAPChatState(projektId) {
+      if (!AS.apChat[projektId]) AS.apChat[projektId] = { messages: [], loading: false };
+      return AS.apChat[projektId];
+    }
+
+    function renderAPChat(projektId) {
+      var state = getAPChatState(projektId);
+      var msgCount = state.messages.length;
+      var h = '<div class="ap-chat" id="ap-chat-' + escAttr(projektId) + '">';
+      h += '<div class="ap-chat-header">';
+      h += '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ci-color-brand-blue)" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-2 3-2 8h-4c0-5-2-6.05-2-8a4 4 0 014-4z"/><line x1="10" y1="18" x2="14" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/></svg>';
+      h += '<span class="ap-chat-header-title">AP-Assistent</span>';
+      h += '<span class="ap-chat-header-badge" id="ap-chat-badge-' + escAttr(projektId) + '"' + (msgCount > 0 ? '' : ' style="display:none"') + '>' + (msgCount > 0 ? msgCount + ' Nachrichten' : '') + '</span>';
+      h += '</div>';
+      h += '<div class="ap-chat-messages" id="ap-chat-messages-' + escAttr(projektId) + '">';
+      h += renderAPChatMessagesInner(projektId);
+      h += '</div>';
+      h += '<div class="ap-chat-input-area">';
+      h += '<textarea class="ap-chat-input" id="ap-chat-input-' + escAttr(projektId) + '" rows="1" placeholder="Sachverhalt schildern oder Frage beantworten..." onkeydown="if(event.ctrlKey&&event.key===\'Enter\'){event.preventDefault();sendAPChatMessage(\'' + escAttr(projektId) + '\')}" oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,120)+\'px\'"></textarea>';
+      h += '<button class="mic-btn" id="mic-btn-ap-chat-input-' + escAttr(projektId) + '" onclick="startVoiceInput(\'ap-chat-input-' + escAttr(projektId) + '\')" title="Spracheingabe" style="flex-shrink:0"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>';
+      h += '<button class="ap-chat-send" onclick="sendAPChatMessage(\'' + escAttr(projektId) + '\')"' + (state.loading ? ' disabled' : '') + '>Senden</button>';
+      h += '</div>';
+      h += '</div>';
+      return h;
+    }
+
+    function renderAPChatMessagesInner(projektId) {
+      var state = getAPChatState(projektId);
+      var h = '';
+      state.messages.forEach(function(msg, msgIdx) {
+        if (msg.role === 'user') {
+          h += '<div class="ap-chat-msg"><div class="ap-chat-msg-user">' + esc(msg.content) + '</div></div>';
+        } else if (msg.role === 'ai') {
+          h += '<div class="ap-chat-msg"><div class="ap-chat-msg-ai">';
+          if (msg.content) h += '<div class="ap-chat-msg-ai-text">' + esc(msg.content) + '</div>';
+          if (msg.questions && msg.questions.length) {
+            msg.questions.forEach(function(q) {
+              h += '<div class="ap-chat-question"><div class="ap-chat-question-text">' + esc(q.text) + '</div>';
+              if (q.options && q.options.length) {
+                h += '<div class="ap-chat-question-options">';
+                q.options.forEach(function(opt) {
+                  h += '<button class="ap-chat-question-opt" onclick="answerAPChatQuestion(\'' + escAttr(projektId) + '\',\'' + escAttr(q.id) + '\',\'' + escAttr(opt) + '\')">' + esc(opt) + '</button>';
+                });
+                h += '</div>';
+              }
+              h += '</div>';
+            });
+          }
+          if (msg.proposals && msg.proposals.length) {
+            var hasUnapproved = false;
+            msg.proposals.forEach(function(ap, apIdx) {
+              var isApproved = ap._approved;
+              if (!isApproved) hasUnapproved = true;
+              h += '<div class="ap-chat-ap-card' + (isApproved ? ' approved' : '') + '" id="ap-card-' + msgIdx + '-' + apIdx + '">';
+              h += '<div class="ap-chat-ap-title">' + esc(ap.titel || '') + '</div>';
+              h += '<div class="ap-chat-ap-desc">' + esc(ap.beschreibung || '') + '</div>';
+              h += '<div class="ap-chat-ap-meta">';
+              if (ap.aufwand_h) h += '<span>' + ap.aufwand_h + 'h</span>';
+              if (ap.prioritaet) h += '<span class="prio-' + escAttr(ap.prioritaet) + '">' + esc(ap.prioritaet) + '</span>';
+              if (ap.tags && ap.tags.length) h += '<span>' + ap.tags.map(function(t) { return esc(t); }).join(', ') + '</span>';
+              h += '</div>';
+              if (!isApproved) {
+                h += '<div class="ap-chat-ap-actions">';
+                h += '<button class="btn btn-success btn-xs" onclick="approveAPProposal(\'' + escAttr(projektId) + '\',' + msgIdx + ',' + apIdx + ')">Uebernehmen</button>';
+                h += '<button class="btn btn-secondary btn-xs" onclick="editAPProposal(\'' + escAttr(projektId) + '\',' + msgIdx + ',' + apIdx + ')">Bearbeiten</button>';
+                h += '<button class="btn btn-xs" style="color:var(--ci-text-muted)" onclick="this.closest(\'.ap-chat-ap-card\').remove()">Verwerfen</button>';
+                h += '</div>';
+              } else {
+                h += '<div style="font-size:10px;color:var(--ci-success);font-weight:600;margin-top:4px">Uebernommen</div>';
+              }
+              h += '</div>';
+            });
+            if (hasUnapproved && msg.proposals.length > 1) {
+              h += '<div style="margin-top:6px"><button class="btn btn-success btn-xs" onclick="approveAllAPProposals(\'' + escAttr(projektId) + '\',' + msgIdx + ')">Alle uebernehmen</button></div>';
+            }
+          }
+          h += '</div></div>';
+        }
+      });
+      if (state.loading) {
+        h += '<div class="ap-chat-msg"><div class="ap-chat-loading"><div class="ap-chat-dots"><span></span><span></span><span></span></div>AP-Assistent denkt nach...</div></div>';
+      }
+      return h;
+    }
+
+    function renderAPChatMessages(projektId) {
+      var el = document.getElementById('ap-chat-messages-' + projektId);
+      if (!el) return;
+      el.innerHTML = renderAPChatMessagesInner(projektId);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function sendAPChatMessage(projektId) {
+      var inputEl = document.getElementById('ap-chat-input-' + projektId);
+      if (!inputEl) return;
+      var text = inputEl.value.trim();
+      if (!text) { Toast.show('Bitte Text eingeben', 'error'); return; }
+      var state = getAPChatState(projektId);
+      if (state.loading) return;
+      var url = settings.apAssistentUrl;
+      if (!url) { Toast.show('AP-Assistent URL nicht konfiguriert (Einstellungen)', 'error'); return; }
+      if (!RateLimit.check('ki', 10, 60000)) { Toast.show('KI: Zu viele Anfragen', 'error'); return; }
+      var endpoint;
+      try { endpoint = new URL(url); if (endpoint.protocol !== 'https:' && endpoint.protocol !== 'http:') throw new Error(); }
+      catch (e) { Toast.show('Ungueltige AP-Assistent URL', 'error'); return; }
+      state.messages.push({ role: 'user', content: text, proposals: [], questions: [] });
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      state.loading = true;
+      renderAPChatMessages(projektId);
+      Anonymize.reset();
+      var projekt = Store.projekte.find(function(p) { return p.id === projektId; });
+      var projektAPs = Store.arbeitspakete.filter(function(a) { return a.projekt_id === projektId; });
+      var conversation = state.messages.map(function(m) {
+        return { role: m.role, content: m.content };
+      });
+      var context = {
+        projekt: projekt ? Anonymize.projekt(projekt) : null,
+        vorhandene_aps: projektAPs.map(function(a) { return Anonymize.ap(a); }),
+        personen: Store.personen.map(function(p) { return Anonymize.person(p); }),
+        heute: U.today()
+      };
+      var headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+      var apiKey = U.deobfuscate(settings.kiKey || '');
+      if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey;
+      fetch(endpoint.href, {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ projekt_id: projektId, conversation: conversation, context: context })
+      })
+        .then(function(r) {
+          if (!r.ok) return r.text().then(function(t) { throw new Error('HTTP ' + r.status); });
+          return r.text().then(function(txt) {
+            if (!txt || !txt.trim()) throw new Error('Leere Antwort. Anthropic-Credential in n8n zugewiesen?');
+            return JSON.parse(txt);
+          });
+        })
+        .then(function(data) {
+          state.loading = false;
+          var aiMsg = { role: 'ai', content: '', proposals: [], questions: [] };
+          if (data.text) aiMsg.content = Anonymize.deanonymize(data.text);
+          if (data.hinweise) aiMsg.content += (aiMsg.content ? '\n' : '') + Anonymize.deanonymize(data.hinweise);
+          if (data.questions && data.questions.length) {
+            aiMsg.questions = data.questions.map(function(q) {
+              return { id: q.id, text: Anonymize.deanonymize(q.text), options: (q.options || []).map(function(o) { return Anonymize.deanonymize(o); }) };
+            });
+          }
+          if (data.arbeitspakete && data.arbeitspakete.length) {
+            aiMsg.proposals = data.arbeitspakete.map(function(ap) {
+              return {
+                titel: Anonymize.deanonymize(ap.titel || ''),
+                beschreibung: Anonymize.deanonymize(ap.beschreibung || ''),
+                ergebnis: Anonymize.deanonymize(ap.ergebnis || ''),
+                aufwand_h: ap.aufwand_h || 0,
+                prioritaet: ap.prioritaet || 'mittel',
+                tags: ap.tags || [],
+                empfehlung_person: ap.empfehlung_person ? Anonymize.deanonymize(ap.empfehlung_person) : '',
+                abhaengig_von: ap.abhaengig_von ? Anonymize.deanonymize(ap.abhaengig_von) : '',
+                _approved: false
+              };
+            });
+          }
+          state.messages.push(aiMsg);
+          renderAPChatMessages(projektId);
+          updateAPChatBadge(projektId);
+          Toast.show('AP-Assistent hat geantwortet', 'success');
+        })
+        .catch(function(err) {
+          state.loading = false;
+          state.messages.push({ role: 'ai', content: 'Fehler: ' + err.message, proposals: [], questions: [] });
+          renderAPChatMessages(projektId);
+          Toast.show('AP-Assistent Fehler', 'error');
+        });
+    }
+
+    function answerAPChatQuestion(projektId, questionId, answer) {
+      var inputEl = document.getElementById('ap-chat-input-' + projektId);
+      var text = 'Antwort auf [' + questionId + ']: ' + answer;
+      if (inputEl) inputEl.value = text;
+      sendAPChatMessage(projektId);
+    }
+
+    function approveAPProposal(projektId, msgIdx, apIdx) {
+      var state = getAPChatState(projektId);
+      var msg = state.messages[msgIdx];
+      if (!msg || !msg.proposals || !msg.proposals[apIdx]) return;
+      var ap = msg.proposals[apIdx];
+      if (ap._approved) return;
+      var now = new Date().toISOString();
+      var verantId = '';
+      if (ap.empfehlung_person) {
+        var match = Store.personen.find(function(p) { return p.name.toLowerCase().includes(String(ap.empfehlung_person).toLowerCase()) || (p.kuerzel && p.kuerzel.toLowerCase() === String(ap.empfehlung_person).toLowerCase()); });
+        if (match) verantId = match.id;
+      }
+      var obj = {
+        id: U.uid(), titel: ap.titel, beschreibung: ap.beschreibung,
+        ergebnis: ap.ergebnis || '', aufwand_h: ap.aufwand_h || 0, aufwand_ist_h: 0,
+        projekt_id: projektId, status: 'offen', prioritaet: ap.prioritaet || 'mittel',
+        verantwortlicher_id: verantId, tags: (ap.tags || []).concat(['ap-assistent']),
+        quelle: 'ki_generiert', deadline: '', wiedervorlage: '',
+        erstellt: now, geaendert: now
+      };
+      Store.arbeitspakete.push(obj);
+      Store.markDirty('arbeitspakete'); Store.persist();
+      ap._approved = true;
+      renderAPChatMessages(projektId);
+      renderAll();
+      Toast.show('"' + obj.titel + '" angelegt', 'success');
+    }
+
+    function approveAllAPProposals(projektId, msgIdx) {
+      var state = getAPChatState(projektId);
+      var msg = state.messages[msgIdx];
+      if (!msg || !msg.proposals) return;
+      var count = 0;
+      msg.proposals.forEach(function(ap, apIdx) {
+        if (!ap._approved) {
+          approveAPProposal(projektId, msgIdx, apIdx);
+          count++;
+        }
+      });
+      if (count > 1) Toast.show(count + ' AP uebernommen', 'success');
+    }
+
+    function editAPProposal(projektId, msgIdx, apIdx) {
+      var state = getAPChatState(projektId);
+      var msg = state.messages[msgIdx];
+      if (!msg || !msg.proposals || !msg.proposals[apIdx]) return;
+      var ap = msg.proposals[apIdx];
+      AS.modalType = 'arbeitspakete';
+      AS.modalEditId = null;
+      var prefill = {
+        titel: ap.titel || '', beschreibung: ap.beschreibung || '', ergebnis: ap.ergebnis || '',
+        aufwand_h: ap.aufwand_h || '', aufwand_ist_h: '', projekt_id: projektId,
+        status: 'offen', prioritaet: ap.prioritaet || 'mittel',
+        tags: (ap.tags || []).concat(['ap-assistent']), quelle: 'ki_generiert',
+        verantwortlicher_id: '', deadline: '', wiedervorlage: '', delegationslevel: ''
+      };
+      document.getElementById('modal-title').textContent = 'AP-Vorschlag bearbeiten';
+      document.getElementById('modal-body').innerHTML = getModalForm('arbeitspakete', prefill, projektId);
+      document.getElementById('modal-delete-btn').style.display = 'none';
+      var saveBtn = document.getElementById('modal-save-btn');
+      saveBtn.textContent = 'Anlegen';
+      saveBtn.onclick = function() {
+        var d = getFormData();
+        if (!d.titel || !d.titel.trim()) { Toast.show('Titel erforderlich', 'error'); return; }
+        var now = new Date().toISOString();
+        var obj = {
+          id: U.uid(), titel: d.titel.trim(), beschreibung: d.beschreibung || '',
+          ergebnis: d.ergebnis || '', aufwand_h: parseFloat(d.aufwand_h) || 0, aufwand_ist_h: parseFloat(d.aufwand_ist_h) || 0,
+          projekt_id: d.projekt_id || projektId, status: d.status || 'offen', prioritaet: d.prioritaet || 'mittel',
+          verantwortlicher_id: d.verantwortlicher_id || '', tags: d.tags || [],
+          quelle: d.quelle || 'ki_generiert', deadline: d.deadline || '', wiedervorlage: d.wiedervorlage || '',
+          delegationslevel: d.delegationslevel || '', erstellt: now, geaendert: now
+        };
+        Store.arbeitspakete.push(obj);
+        Store.markDirty('arbeitspakete'); Store.persist();
+        ap._approved = true;
+        saveBtn.textContent = 'Speichern';
+        saveBtn.onclick = function() { saveItem(); };
+        closeModal();
+        renderAPChatMessages(projektId);
+        renderAll();
+        Toast.show('"' + obj.titel + '" angelegt', 'success');
+      };
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function updateAPChatBadge(projektId) {
+      var badgeEl = document.getElementById('ap-chat-badge-' + projektId);
+      if (!badgeEl) return;
+      var state = getAPChatState(projektId);
+      badgeEl.textContent = state.messages.length > 0 ? state.messages.length + ' Nachrichten' : '';
+      badgeEl.style.display = state.messages.length > 0 ? '' : 'none';
+    }
+
+    function focusAPChat(projektId, prefillText) {
+      var chatEl = document.getElementById('ap-chat-' + projektId);
+      if (chatEl) chatEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var inputEl = document.getElementById('ap-chat-input-' + projektId);
+      if (inputEl) {
+        if (prefillText) inputEl.value = prefillText;
+        inputEl.focus();
+      }
     }
 
     // ═══════════════════════════════════════════
