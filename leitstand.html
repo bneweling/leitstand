@@ -818,6 +818,11 @@
             <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntProjekte(this)">
           </div>
           <div class="settings-section">
+            <h4>Personen aus Kalender</h4>
+            <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">Teilnehmer aus projekt-zugeordneten Terminen als Personen uebernehmen. hisolutions.com = internes Team, andere = Kundenkontakt.</p>
+            <button class="btn btn-secondary btn-sm" onclick="extractPersonenFromTermine()">Personen aus Terminen extrahieren</button>
+          </div>
+          <div class="settings-section">
             <h4>Datenverwaltung</h4>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-secondary btn-sm" onclick="FileDB.open()">Datei laden</button>
@@ -1708,13 +1713,17 @@
         };
         var dtStart = get('DTSTART');
         if (dtStart) {
-          // Extract ATTENDEE names (CN parameter)
+          // Extract ATTENDEE names + emails
           var attendees = [];
-          var attRe = /^ATTENDEE[^:]*?CN=([^;:]+)/gm;
+          var attRe = /^ATTENDEE[^\n]*/gm;
           var attMatch;
           while ((attMatch = attRe.exec(block)) !== null) {
-            var cn = attMatch[1].replace(/^"/, '').replace(/"$/, '').trim();
-            if (cn) attendees.push(cn);
+            var line = attMatch[0];
+            var cnMatch = line.match(/CN="?([^";:]+)"?/i);
+            var mailMatch = line.match(/mailto:([^\s;>]+)/i);
+            var cn = cnMatch ? cnMatch[1].trim() : '';
+            var email = mailMatch ? mailMatch[1].trim().toLowerCase() : '';
+            if (cn || email) attendees.push({ name: cn || email.split('@')[0], email: email });
           }
           // Generate UID from DTSTART+SUMMARY hash if missing
           var uid = get('UID');
@@ -1866,7 +1875,7 @@
       var projOpts = '<option value="">\u2014 Kein Projekt</option>' + Store.projekte.map(function(p) { return '<option value="' + escAttr(p.id) + '"' + (t.projekt_id === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('');
       var teilnehmerHtml = '';
       if (t.teilnehmer && t.teilnehmer.length) {
-        teilnehmerHtml = '<div class="form-row"><div class="field-label">Teilnehmer</div><div style="font-size:11px;color:var(--ci-text-muted);padding:6px 0">' + t.teilnehmer.map(function(tn) { return esc(tn); }).join(', ') + '</div></div>';
+        teilnehmerHtml = '<div class="form-row"><div class="field-label">Teilnehmer</div><div style="font-size:11px;color:var(--ci-text-muted);padding:6px 0">' + t.teilnehmer.map(function(tn) { return typeof tn === 'string' ? esc(tn) : esc(tn.name) + (tn.email ? ' <span style="color:var(--ci-text-muted);font-size:10px">' + esc(tn.email) + '</span>' : ''); }).join('<br>') + '</div></div>';
       }
       var formHtml = '<div class="form-row"><div class="field-label">Titel</div><input type="text" name="titel" value="' + escAttr(t.titel) + '"></div>' +
         '<div class="form-grid">' +
@@ -2010,6 +2019,50 @@
       });
       if (updated) { Store.markDirty('projekte'); Store.persist(); renderAll(); }
       Toast.show(updated + ' Projektrollen aktualisiert', updated ? 'success' : 'info');
+    }
+    function extractPersonenFromTermine() {
+      var zugeordnet = Store.termine.filter(function(t) { return t.projekt_id && t.status === 'aktiv' && t.teilnehmer && t.teilnehmer.length; });
+      if (!zugeordnet.length) { Toast.show('Keine projekt-zugeordneten Termine mit Teilnehmern', 'info'); return; }
+      // Collect unique people by email
+      var people = {};
+      zugeordnet.forEach(function(t) {
+        t.teilnehmer.forEach(function(tn) {
+          var email = typeof tn === 'string' ? '' : (tn.email || '');
+          var name = typeof tn === 'string' ? tn : (tn.name || '');
+          if (!name || name === 'HiS_Eventkalender') return;
+          var key = email || name.toLowerCase();
+          if (!people[key]) people[key] = { name: name, email: email, projekte: new Set(), count: 0 };
+          people[key].projekte.add(t.projekt_id);
+          people[key].count++;
+        });
+      });
+      // Filter: skip self, skip already existing
+      var meinName = (settings.meinName || '').toLowerCase();
+      var meinEmail = (settings.meinKuerzel || '').toLowerCase();
+      var now = new Date().toISOString();
+      var added = 0, skipped = 0;
+      Object.values(people).forEach(function(p) {
+        if (p.name.toLowerCase() === meinName) return;
+        if (meinEmail && p.email.toLowerCase().includes(meinEmail)) return;
+        // Skip if person with same name already exists
+        if (Store.personen.some(function(pe) { return pe.name.toLowerCase() === p.name.toLowerCase(); })) { skipped++; return; }
+        var isIntern = p.email.includes('hisolutions.com');
+        var kuerzel = p.email ? p.email.split('@')[0] : '';
+        // Build short kuerzel from email: neweling → new, or first 3 chars of last name
+        if (kuerzel.length > 5) kuerzel = kuerzel.substring(0, 4);
+        Store.personen.push({
+          id: U.uid(), name: p.name, kuerzel: kuerzel,
+          anrede: '', rolle: isIntern ? 'berater' : 'kundenansprechpartner',
+          organisation: isIntern ? 'HiSolutions' : '',
+          email: p.email, schwerpunkte: [],
+          verfuegbarkeit: 'verfuegbar', notiz: 'Aus Kalender extrahiert (' + p.count + ' Termine)',
+          projekt_ids: Array.from(p.projekte),
+          erstellt: now, geaendert: now
+        });
+        added++;
+      });
+      if (added) { Store.markDirty('personen'); Store.persist(); renderAll(); }
+      Toast.show(added + ' Personen angelegt, ' + skipped + ' uebersprungen (existieren bereits)', added ? 'success' : 'info');
     }
 
     // ═══════════════════════════════════════════
