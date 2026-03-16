@@ -1950,8 +1950,28 @@
           rows.forEach(function(row) {
             var rawName = (row[1] || '').trim();
             if (!rawName) return;
-            // Remove leading "XX." numbering prefix (e.g. "21." or "63330.")
-            var cleanName = rawName.replace(/^\d+\./, '').trim();
+            // Parse BlueAnt name: "NUMMER.KUNDE.SUBKUNDE.AUFTRAG.PROJEKTNAME"
+            var nameParts = rawName.replace(/^\d+\./, '').trim().split('.');
+            var kunde = nameParts.length > 1 ? nameParts[0].trim() : '';
+            var restParts = nameParts.length > 1 ? nameParts.slice(1) : nameParts;
+            // Remove duplicate of kunde at start (e.g. "BSI.BSI.SU0056..." → skip second BSI)
+            if (restParts.length > 1 && restParts[0].trim().toLowerCase() === kunde.toLowerCase()) restParts = restParts.slice(1);
+            // Identify SU-numbers and sub-client codes, put them in brackets
+            var projektName = [];
+            var subInfo = [];
+            restParts.forEach(function(p) {
+              p = p.trim();
+              if (/^SU\d+$/i.test(p)) subInfo.push(p);
+              else if (/^[A-Z]{2,5}$/.test(p) && p.length <= 5) subInfo.push(p);
+              else projektName.push(p);
+            });
+            var cleanName = projektName.join(' - ').replace(/_/g, ' ').replace(/\s{2,}/g, ' ').trim();
+            if (subInfo.length) cleanName += ' (' + subInfo.join('/') + ')';
+            if (kunde && subInfo.some(function(s) { return !/^SU/i.test(s); })) {
+              // Sub-client like BPOL, BPRA goes into kunde
+              var subClient = subInfo.filter(function(s) { return !/^SU/i.test(s); }).join('/');
+              kunde = kunde + ' / ' + subClient;
+            }
             if (!cleanName) cleanName = rawName;
             // Skip duplicates by name
             if (Store.projekte.some(function(p) { return p.name === cleanName; })) { skipped++; return; }
@@ -1971,7 +1991,7 @@
             if (meinKuerzel && plList.indexOf(meinKuerzel) >= 0) rolle = 'leiter';
             else if (meinKuerzel && stvList.indexOf(meinKuerzel) >= 0) rolle = 'stellvertreter';
             Store.projekte.push({
-              id: U.uid(), name: cleanName, kunde: '',
+              id: U.uid(), name: cleanName, kunde: kunde,
               rolle: rolle, status: status, prioritaet: 'mittel',
               deadline: ende,
               tags: nummer ? [nummer] : [],
