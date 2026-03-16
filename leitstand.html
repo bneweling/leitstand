@@ -565,6 +565,7 @@
             <span id="topbar-date" style="font-size:12px;color:var(--ci-text-muted)"></span>
           </div>
           <div class="topbar-right">
+            <button class="btn btn-secondary btn-sm" onclick="PlannerSync.sync()" title="Mit Planner synchronisieren"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sync</button>
           </div>
         </div>
 
@@ -822,6 +823,19 @@
             <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntProjekte(this)">
           </div>
           <div class="settings-section">
+            <h4>Planner Sync</h4>
+            <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">Arbeitspakete mit Microsoft Planner synchronisieren via OneDrive-Ordner.</p>
+            <div style="margin-bottom:var(--spacing-sm)">
+              <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">Planner Plan-ID</label>
+              <input type="text" id="set-plannerPlanId" placeholder="Plan-GUID aus Planner URL" style="font-size:11px">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--spacing-sm)">
+              <button class="btn btn-secondary btn-sm" onclick="PlannerSync.bindFolder()">Sync-Ordner verbinden</button>
+              <button class="btn btn-primary btn-sm" onclick="PlannerSync.sync()">Jetzt synchronisieren</button>
+            </div>
+            <div id="planner-sync-status" style="font-size:10px;color:var(--ci-text-muted)"></div>
+          </div>
+          <div class="settings-section">
             <h4>Datenverwaltung</h4>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-secondary btn-sm" onclick="FileDB.open()">Datei laden</button>
@@ -966,6 +980,7 @@
       warnDeadlineTage: 3, // Tage bis Deadline = gelbe Ampel
       autosaveIntervall: 30, // Sekunden
       startView: 'meintag', // Welche View beim Start
+      plannerPlanId: '',
     };
     var settings = { ...SETTINGS_DEFAULTS, ...U.load('settings', null) };
 
@@ -1022,6 +1037,239 @@
     setInterval(() => { if (FileDB.handle && FileDB._dirty) FileDB.save(true); OPFS.write(); }, 30 * 1000);
 
     // ═══════════════════════════════════════════
+    // PlannerSync
+    // ═══════════════════════════════════════════
+    var PlannerSync = {
+      dirHandle: null,
+      idMap: [],
+      _lastSync: null,
+
+      isSupported: function() { return 'showDirectoryPicker' in window; },
+
+      async bindFolder() {
+        if (!this.isSupported()) { Toast.show('showDirectoryPicker nicht verfuegbar (Chrome/Edge noetig)', 'error'); return; }
+        try {
+          this.dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          await this._persistHandle();
+          await this._loadMeta();
+          this._updateStatus();
+          Toast.show('Sync-Ordner verbunden: ' + this.dirHandle.name, 'success');
+        } catch (e) {
+          if (e.name !== 'AbortError') Toast.show('Fehler: ' + e.message, 'error');
+        }
+      },
+
+      async _persistHandle() {
+        if (!this.dirHandle) return;
+        var request = indexedDB.open('LeitstandSync', 1);
+        request.onupgradeneeded = function(e) { e.target.result.createObjectStore('handles'); };
+        request.onsuccess = function(e) {
+          var db = e.target.result;
+          var tx = db.transaction('handles', 'readwrite');
+          tx.objectStore('handles').put(PlannerSync.dirHandle, 'syncDir');
+        };
+      },
+
+      async _restoreHandle() {
+        return new Promise(function(resolve) {
+          var request = indexedDB.open('LeitstandSync', 1);
+          request.onupgradeneeded = function(e) { e.target.result.createObjectStore('handles'); };
+          request.onsuccess = function(e) {
+            var db = e.target.result;
+            var tx = db.transaction('handles', 'readonly');
+            var get = tx.objectStore('handles').get('syncDir');
+            get.onsuccess = function() {
+              if (get.result) {
+                PlannerSync.dirHandle = get.result;
+                resolve(true);
+              } else { resolve(false); }
+            };
+            get.onerror = function() { resolve(false); };
+          };
+          request.onerror = function() { resolve(false); };
+        });
+      },
+
+      async _readFile(name) {
+        if (!this.dirHandle) return null;
+        try {
+          var fh = await this.dirHandle.getFileHandle(name);
+          var file = await fh.getFile();
+          return JSON.parse(await file.text());
+        } catch (e) { return null; }
+      },
+
+      async _writeFile(name, data) {
+        if (!this.dirHandle) return;
+        try {
+          var fh = await this.dirHandle.getFileHandle(name, { create: true });
+          var w = await fh.createWritable();
+          await w.write(JSON.stringify(data, null, 2));
+          await w.close();
+        } catch (e) { Toast.show('Dateifehler: ' + e.message, 'error'); }
+      },
+
+      async _loadMeta() {
+        var meta = await this._readFile('sync-meta.json');
+        if (meta) {
+          this.idMap = meta.id_map || [];
+          if (meta.plan_id && !settings.plannerPlanId) {
+            settings.plannerPlanId = meta.plan_id;
+            U.save('settings', settings);
+          }
+        }
+      },
+
+      async persistMeta() {
+        await this._writeFile('sync-meta.json', {
+          plan_id: settings.plannerPlanId || '',
+          id_map: this.idMap,
+          last_synced: new Date().toISOString()
+        });
+      },
+
+      // ─── EXPORT: Leitstand → Planner ───
+      async exportToPlanner() {
+        var now = new Date().toISOString();
+        var exportAPs = [];
+
+        Store.arbeitspakete.forEach(function(ap) {
+          var mapping = PlannerSync.idMap.find(function(m) { return m.ap_id === ap.id; });
+          var lastSynced = mapping ? mapping.last_synced : null;
+          var isNew = !mapping;
+          var isChanged = !isNew && ap.geaendert && (!lastSynced || ap.geaendert > lastSynced);
+
+          if (isNew) {
+            var person = ap.verantwortlicher_id ? Store.personen.find(function(p) { return p.id === ap.verantwortlicher_id; }) : null;
+            var projekt = ap.projekt_id ? Store.projekte.find(function(p) { return p.id === ap.projekt_id; }) : null;
+            exportAPs.push({
+              id: ap.id, planner_task_id: null, titel: ap.titel,
+              beschreibung: ap.beschreibung || '', status: ap.status,
+              deadline: ap.deadline || '', prioritaet: ap.prioritaet || 'mittel',
+              aufwand_h: ap.aufwand_h || 0,
+              verantwortlicher_email: person ? person.email : '',
+              projekt_name: projekt ? projekt.name : '',
+              tags: ap.tags || [],
+              _action: 'create', _changed_at: ap.geaendert || now
+            });
+            PlannerSync.idMap.push({ ap_id: ap.id, planner_task_id: null, last_synced: now });
+          } else if (isChanged) {
+            exportAPs.push({
+              id: ap.id, planner_task_id: mapping.planner_task_id,
+              titel: ap.titel, status: ap.status, deadline: ap.deadline || '',
+              prioritaet: ap.prioritaet || 'mittel',
+              _action: 'update', _changed_at: ap.geaendert || now
+            });
+            mapping.last_synced = now;
+          }
+        });
+
+        // Check for deleted APs (in idMap but not in Store)
+        PlannerSync.idMap.forEach(function(mapping) {
+          if (mapping.planner_task_id && !Store.arbeitspakete.find(function(a) { return a.id === mapping.ap_id; })) {
+            exportAPs.push({ id: mapping.ap_id, planner_task_id: mapping.planner_task_id, _action: 'delete', _changed_at: now });
+          }
+        });
+
+        if (exportAPs.length) {
+          await this._writeFile('leitstand-export.json', {
+            exported_at: now, plan_id: settings.plannerPlanId || '', arbeitspakete: exportAPs
+          });
+        }
+        return exportAPs.length;
+      },
+
+      // ─── IMPORT: Planner → Leitstand ───
+      async importFromPlanner() {
+        var data = await this._readFile('planner-export.json');
+        if (!data || !data.tasks || !data.tasks.length) return 0;
+
+        var now = new Date().toISOString();
+        var imported = 0;
+        var statusMap = { 0: 'offen', 50: 'in_arbeit', 100: 'erledigt' };
+
+        data.tasks.forEach(function(task) {
+          var mapping = PlannerSync.idMap.find(function(m) { return m.planner_task_id === task.planner_task_id; });
+
+          if (mapping) {
+            var ap = Store.arbeitspakete.find(function(a) { return a.id === mapping.ap_id; });
+            if (ap && task._changed_at && (!ap.geaendert || task._changed_at > ap.geaendert)) {
+              var newStatus = statusMap[task.percent_complete] || task.status_mapped;
+              if (newStatus && newStatus !== ap.status) {
+                if (!(ap.status === 'delegiert' || ap.status === 'review') || newStatus !== 'in_arbeit') {
+                  ap.status = newStatus;
+                }
+              }
+              if (task.due_date && task.due_date !== ap.deadline) ap.deadline = task.due_date;
+              ap.geaendert = now;
+              Store.markDirty('arbeitspakete');
+              imported++;
+            }
+          } else if (task.leitstand_ap_id) {
+            var existingAP = Store.arbeitspakete.find(function(a) { return a.id === task.leitstand_ap_id; });
+            if (existingAP) {
+              PlannerSync.idMap.push({ ap_id: existingAP.id, planner_task_id: task.planner_task_id, last_synced: now });
+            }
+          } else {
+            var newId = U.uid();
+            Store.arbeitspakete.push({
+              id: newId, titel: task.title || '', beschreibung: '',
+              ergebnis: '', projekt_id: '', verantwortlicher_id: '',
+              status: statusMap[task.percent_complete] || 'offen',
+              aufwand_h: 0, aufwand_ist_h: 0,
+              deadline: task.due_date || '', prioritaet: 'mittel',
+              delegationslevel: '', abhaengigkeiten: [],
+              tags: ['Planner'], quelle: 'planner', wiedervorlage: '',
+              erstellt: now, geaendert: now
+            });
+            PlannerSync.idMap.push({ ap_id: newId, planner_task_id: task.planner_task_id, last_synced: now });
+            Store.markDirty('arbeitspakete');
+            imported++;
+          }
+        });
+
+        // Update planner_task_ids from the export response (PA writes back new IDs)
+        if (data.created_mappings) {
+          data.created_mappings.forEach(function(cm) {
+            var m = PlannerSync.idMap.find(function(x) { return x.ap_id === cm.ap_id; });
+            if (m) m.planner_task_id = cm.planner_task_id;
+          });
+        }
+
+        if (imported) { Store.persist(); renderAll(); }
+        return imported;
+      },
+
+      // ─── FULL SYNC ───
+      async sync() {
+        if (!this.dirHandle) {
+          var restored = await this._restoreHandle();
+          if (!restored) { Toast.show('Bitte zuerst Sync-Ordner verbinden (Einstellungen)', 'error'); return; }
+          try { await this.dirHandle.requestPermission({ mode: 'readwrite' }); }
+          catch (e) { Toast.show('Zugriff auf Sync-Ordner verweigert', 'error'); this.dirHandle = null; return; }
+        }
+        await this._loadMeta();
+        var imp = await this.importFromPlanner();
+        var exp = await this.exportToPlanner();
+        await this.persistMeta();
+        this._lastSync = new Date().toISOString();
+        this._updateStatus();
+        Toast.show('Sync: ' + exp + ' exportiert, ' + imp + ' importiert', 'success');
+      },
+
+      _updateStatus: function() {
+        var el = document.getElementById('planner-sync-status');
+        if (!el) return;
+        var parts = [];
+        if (this.dirHandle) parts.push('Ordner: ' + this.dirHandle.name);
+        else parts.push('Kein Ordner verbunden');
+        if (this._lastSync) parts.push('Letzte Sync: ' + U.dateFmt(this._lastSync));
+        parts.push(this.idMap.length + ' AP gemappt');
+        el.textContent = parts.join(' \u00B7 ');
+      }
+    };
+
+    // ═══════════════════════════════════════════
     // App Namespace
     // ═══════════════════════════════════════════
     const App = {
@@ -1059,6 +1307,8 @@
       document.getElementById('set-followupTage').value = settings.followupTage || 5;
       document.getElementById('set-warnDeadlineTage').value = settings.warnDeadlineTage || 3;
       document.getElementById('set-autosaveIntervall').value = settings.autosaveIntervall || 30;
+      document.getElementById('set-plannerPlanId').value = settings.plannerPlanId || '';
+      PlannerSync._updateStatus();
     }
     function closeSettings() { document.getElementById('settings-overlay').classList.remove('open'); }
     function saveSettings() {
@@ -1076,6 +1326,7 @@
       settings.followupTage = parseInt(document.getElementById('set-followupTage').value) || 5;
       settings.warnDeadlineTage = parseInt(document.getElementById('set-warnDeadlineTage').value) || 3;
       settings.autosaveIntervall = parseInt(document.getElementById('set-autosaveIntervall').value) || 30;
+      settings.plannerPlanId = document.getElementById('set-plannerPlanId').value.trim();
       U.save('settings', settings);
       updateKIPanel(); closeSettings(); renderAll(); Toast.show('Einstellungen gespeichert', 'success');
     }
@@ -4282,6 +4533,7 @@
     updateKIPanel();
     showView(AS.currentView);
     OPFS.checkRecovery();
+    PlannerSync._restoreHandle().then(function(ok) { if (ok) PlannerSync._updateStatus(); });
     </script>
   </body>
 </html>
