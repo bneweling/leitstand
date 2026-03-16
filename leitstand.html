@@ -813,6 +813,7 @@
             <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">Projektliste aus BlueAnt exportieren (CSV) und hier laden.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-projekte').click()">BlueAnt Projekte importieren</button>
+              <button class="btn btn-secondary btn-sm" onclick="reapplyBlueAntRollen()">Rollen neu zuordnen</button>
             </div>
             <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntProjekte(this)">
           </div>
@@ -1965,7 +1966,7 @@
               rolle: rolle, status: status, prioritaet: 'mittel',
               deadline: ende,
               tags: nummer ? [nummer] : [],
-              beschreibung: 'PL: ' + pl + ', Ressourcen: ' + ressourcen,
+              beschreibung: 'PL: ' + pl + ' | Stellv: ' + stellv + ' | Ressourcen: ' + ressourcen,
               erstellt: now, geaendert: now
             });
             count++;
@@ -1988,6 +1989,27 @@
       // Already ISO
       if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
       return s;
+    }
+    function reapplyBlueAntRollen() {
+      var kuerzel = (settings.meinKuerzel || '').trim().toLowerCase();
+      if (!kuerzel) { Toast.show('Bitte zuerst BlueAnt-Kuerzel in Einstellungen eintragen', 'error'); return; }
+      var updated = 0;
+      Store.projekte.forEach(function(p) {
+        var desc = (p.beschreibung || '');
+        // Format: "PL: ben | Stellv: mamex | Ressourcen: ben, dj, ma"
+        var plMatch = desc.match(/PL:\s*([^|]+)/i);
+        var stvMatch = desc.match(/Stellv:\s*([^|]+)/i);
+        if (!plMatch && !stvMatch) return; // Kein BlueAnt-Import
+        var pl = plMatch ? plMatch[1].toLowerCase().split(/[,\s"]+/).filter(Boolean) : [];
+        var stellv = stvMatch ? stvMatch[1].toLowerCase().split(/[,\s"]+/).filter(Boolean) : [];
+        var oldRolle = p.rolle;
+        if (pl.indexOf(kuerzel) >= 0) p.rolle = 'leiter';
+        else if (stellv.indexOf(kuerzel) >= 0) p.rolle = 'stellvertreter';
+        else p.rolle = 'mitglied';
+        if (p.rolle !== oldRolle) updated++;
+      });
+      if (updated) { Store.markDirty('projekte'); Store.persist(); renderAll(); }
+      Toast.show(updated + ' Projektrollen aktualisiert', updated ? 'success' : 'info');
     }
 
     // ═══════════════════════════════════════════
