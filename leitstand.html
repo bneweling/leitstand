@@ -1812,11 +1812,14 @@
     // Auto-match: check if Termintitel contains a Projektname or AP-Titel
     function autoMatchProjekt(titel) {
       if (!titel) return '';
+      // 1. Gespeichertes Titel-Mapping (von frueheren manuellen Zuordnungen)
+      var mappings = U.load('terminTitelMappings', {});
+      if (mappings[titel]) return mappings[titel];
+      // 2. Projektname im Titel
       var lower = titel.toLowerCase();
-      // Try project names
       var match = Store.projekte.find(function(p) { return lower.includes(p.name.toLowerCase()); });
       if (match) return match.id;
-      // Try AP titles
+      // 3. AP-Titel im Termin
       var apMatch = Store.arbeitspakete.find(function(a) { return a.titel && lower.includes(a.titel.toLowerCase()); });
       if (apMatch) return apMatch.projekt_id || '';
       return '';
@@ -1829,7 +1832,26 @@
     }
     function linkTerminProjekt(terminId, projektId) {
       var t = Store.termine.find(function(x) { return x.id === terminId; });
-      if (t) { t.projekt_id = projektId; t.aktualisiert = new Date().toISOString(); Store.markDirty('termine'); Store.persist(); renderKalender(); }
+      if (!t) return;
+      var titel = t.titel;
+      var now = new Date().toISOString();
+      // Alle Termine mit gleichem Titel ebenfalls zuordnen
+      var count = 0;
+      Store.termine.forEach(function(x) {
+        if (x.titel === titel && x.quelle === 'ics' && x.status === 'aktiv') {
+          x.projekt_id = projektId;
+          x.aktualisiert = now;
+          count++;
+        }
+      });
+      // Titel-Mapping speichern fuer zukuenftige Imports
+      var mappings = U.load('terminTitelMappings', {});
+      if (projektId) { mappings[titel] = projektId; }
+      else { delete mappings[titel]; }
+      U.save('terminTitelMappings', mappings);
+      Store.markDirty('termine'); Store.persist();
+      if (count > 1) Toast.show(count + ' Termine mit "' + titel.substring(0, 30) + '..." zugeordnet', 'success');
+      renderKalender();
     }
     function openTerminDetail(terminId) {
       var t = Store.termine.find(function(x) { return x.id === terminId; });
@@ -1912,6 +1934,7 @@
           if (!rows.length) { Toast.show('Keine Datenzeilen gefunden', 'error'); return; }
           // Column mapping: 0=Nummer, 1=Name, 2=Status, 3=Projektstart, 4=Projektende, 5=PL, 6=Stellvertreter, 7=Ressourcen
           var meinKuerzel = (settings.meinKuerzel || '').trim().toLowerCase();
+          if (!meinKuerzel) Toast.show('Hinweis: BlueAnt-Kuerzel in Einstellungen setzen fuer Rollenerkennung', 'warn');
           var now = new Date().toISOString();
           var count = 0, skipped = 0;
           rows.forEach(function(row) {
