@@ -43,7 +43,8 @@
         "ergebnis": "Strukturanalyse-Dokument", "projekt_id": "p1", "verantwortlicher_id": "pe1",
         "status": "erledigt", "aufwand_h": 32, "aufwand_ist_h": 38,
         "deadline": "2026-02-28", "prioritaet": "hoch", "delegationslevel": "beraten",
-        "abhaengigkeiten": [], "tags": ["Strukturanalyse"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": [], "tags": ["Strukturanalyse"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-02-27T16:00:00.000Z"
       },
       {
@@ -51,7 +52,8 @@
         "ergebnis": "Schutzbedarfsfeststellung-Dokument", "projekt_id": "p1", "verantwortlicher_id": "",
         "status": "in_arbeit", "aufwand_h": 24, "aufwand_ist_h": 12,
         "deadline": "2026-03-21", "prioritaet": "hoch", "delegationslevel": "",
-        "abhaengigkeiten": ["ap1"], "tags": ["Schutzbedarf"], "quelle": "manuell", "wiedervorlage": "2026-03-18",
+        "abhaengigkeiten": ["ap1"], "tags": ["Schutzbedarf"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-18",
         "erstellt": "2026-02-28T09:00:00.000Z", "geaendert": "2026-03-10T14:00:00.000Z"
       },
       {
@@ -59,23 +61,26 @@
         "ergebnis": "Modellierungsdokument mit Baustein-Zuordnung", "projekt_id": "p1", "verantwortlicher_id": "pe2",
         "status": "offen", "aufwand_h": 24, "aufwand_ist_h": 0,
         "deadline": "2026-04-11", "prioritaet": "hoch", "delegationslevel": "beraten",
-        "abhaengigkeiten": ["ap2"], "tags": ["Modellierung"], "quelle": "bsi_vorlage", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap2"], "tags": ["Modellierung"], "quelle": "bsi_vorlage",
+        "wiedervorlage": "",
         "erstellt": "2026-03-01T09:00:00.000Z", "geaendert": "2026-03-01T09:00:00.000Z"
       },
       {
-        "id": "ap4", "titel": "IT-Grundschutz-Check: Basis-Anforderungen", "beschreibung": "Soll-Ist-Vergleich aller MUSS-Anforderungen (ja/teilweise/nein/entbehrlich)",
+        "id": "ap4", "titel": "IT-Grundschutz-Check: Basis-Anforderungen", "beschreibung": "Soll-Ist-Vergleich aller MUSS-Anforderungen",
         "ergebnis": "GS-Check Ergebnistabelle Basis", "projekt_id": "p1", "verantwortlicher_id": "pe1",
         "status": "offen", "aufwand_h": 40, "aufwand_ist_h": 0,
         "deadline": "2026-05-09", "prioritaet": "mittel", "delegationslevel": "befragen",
-        "abhaengigkeiten": ["ap3"], "tags": ["GS-Check", "Basis"], "quelle": "bsi_vorlage", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap3"], "tags": ["GS-Check", "Basis"], "quelle": "bsi_vorlage",
+        "wiedervorlage": "",
         "erstellt": "2026-03-01T09:00:00.000Z", "geaendert": "2026-03-01T09:00:00.000Z"
       },
       {
-        "id": "ap5", "titel": "Sicherheitsleitlinie erstellt und freigegeben", "beschreibung": "Stellenwert InfoSec, Bezug Geschaeftsziele, Sicherheitsziele, Organisationsstruktur, Management-Commitment",
+        "id": "ap5", "titel": "Sicherheitsleitlinie erstellt und freigegeben", "beschreibung": "Stellenwert InfoSec, Bezug Geschaeftsziele, Sicherheitsziele, Organisationsstruktur",
         "ergebnis": "Freigegebene Sicherheitsleitlinie", "projekt_id": "p1", "verantwortlicher_id": "",
         "status": "in_arbeit", "aufwand_h": 24, "aufwand_ist_h": 18,
         "deadline": "2026-03-14", "prioritaet": "kritisch", "delegationslevel": "",
-        "abhaengigkeiten": [], "tags": ["Leitlinie", "BSI 200-1"], "quelle": "manuell", "wiedervorlage": "2026-03-14",
+        "abhaengigkeiten": [], "tags": ["Leitlinie", "BSI 200-1"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-14",
         "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-03-12T10:00:00.000Z"
       },
       {
@@ -83,15 +88,17 @@
         "ergebnis": "Auditplan mit Scope-Definition", "projekt_id": "p2", "verantwortlicher_id": "",
         "status": "erledigt", "aufwand_h": 8, "aufwand_ist_h": 6,
         "deadline": "2026-02-15", "prioritaet": "hoch", "delegationslevel": "",
-        "abhaengigkeiten": [], "tags": ["Audit", "Planung"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": [], "tags": ["Audit", "Planung"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-14T17:00:00.000Z"
       },
       {
-        "id": "ap7", "titel": "Desk Audit abgeschlossen", "beschreibung": "Dokumentenpruefung: Richtlinien, Betriebshandbuecher, Change-Records der letzten 12 Monate",
+        "id": "ap7", "titel": "Desk Audit abgeschlossen", "beschreibung": "Dokumentenpruefung: Richtlinien, Betriebshandbuecher, Change-Records",
         "ergebnis": "Desk-Audit-Bericht mit Vorbefunden", "projekt_id": "p2", "verantwortlicher_id": "pe3",
         "status": "erledigt", "aufwand_h": 16, "aufwand_ist_h": 20,
         "deadline": "2026-03-01", "prioritaet": "hoch", "delegationslevel": "delegieren",
-        "abhaengigkeiten": ["ap6"], "tags": ["Audit", "Desk Audit"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap6"], "tags": ["Audit", "Desk Audit"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-02-15T09:00:00.000Z", "geaendert": "2026-02-28T15:00:00.000Z"
       },
       {
@@ -99,47 +106,53 @@
         "ergebnis": "Interview-Protokolle FB Finanzen", "projekt_id": "p2", "verantwortlicher_id": "",
         "status": "in_arbeit", "aufwand_h": 16, "aufwand_ist_h": 8,
         "deadline": "2026-03-18", "prioritaet": "kritisch", "delegationslevel": "",
-        "abhaengigkeiten": ["ap7"], "tags": ["Audit", "Interviews"], "quelle": "manuell", "wiedervorlage": "2026-03-16",
+        "abhaengigkeiten": ["ap7"], "tags": ["Audit", "Interviews"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-16",
         "erstellt": "2026-03-01T09:00:00.000Z", "geaendert": "2026-03-13T14:00:00.000Z"
       },
       {
         "id": "ap9", "titel": "Interviews FB Personal durchgefuehrt", "beschreibung": "2 Interviews: Abteilungsleitung, IT-Koordinator",
         "ergebnis": "Interview-Protokolle FB Personal", "projekt_id": "p2", "verantwortlicher_id": "pe3",
-        "status": "offen", "aufwand_h": 8, "aufwand_ist_h": 0,
+        "status": "delegiert", "aufwand_h": 8, "aufwand_ist_h": 0,
         "deadline": "2026-03-22", "prioritaet": "hoch", "delegationslevel": "anweisen",
-        "abhaengigkeiten": ["ap7"], "tags": ["Audit", "Interviews"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap7"], "tags": ["Audit", "Interviews"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-19",
         "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
       },
       {
-        "id": "ap10", "titel": "Findings dokumentiert und klassifiziert", "beschreibung": "Alle Findings: Beschreibung + Ursache + Auswirkung + Empfehlung, Klassifikation nach Schwere",
+        "id": "ap10", "titel": "Findings dokumentiert und klassifiziert", "beschreibung": "Je Finding: Beschreibung + Ursache + Auswirkung + Empfehlung",
         "ergebnis": "Findings-Register mit Klassifikation", "projekt_id": "p2", "verantwortlicher_id": "",
         "status": "offen", "aufwand_h": 16, "aufwand_ist_h": 0,
         "deadline": "2026-04-01", "prioritaet": "hoch", "delegationslevel": "",
-        "abhaengigkeiten": ["ap8", "ap9"], "tags": ["Audit", "Findings"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap8", "ap9"], "tags": ["Audit", "Findings"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
       },
       {
-        "id": "ap11", "titel": "Auditbericht erstellt", "beschreibung": "Executive Summary, detaillierte Findings, Scope-Beschreibung, Management-Response",
+        "id": "ap11", "titel": "Auditbericht erstellt", "beschreibung": "Executive Summary, detaillierte Findings, Scope-Beschreibung",
         "ergebnis": "Auditbericht (Final)", "projekt_id": "p2", "verantwortlicher_id": "",
         "status": "offen", "aufwand_h": 16, "aufwand_ist_h": 0,
         "deadline": "2026-04-10", "prioritaet": "hoch", "delegationslevel": "",
-        "abhaengigkeiten": ["ap10"], "tags": ["Audit", "Bericht"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap10"], "tags": ["Audit", "Bericht"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
       },
       {
-        "id": "ap12", "titel": "Richtlinie ORP.1 erstellt", "beschreibung": "Organisation und Personal: Richtlinie fuer Sicherheitsmanagement entworfen und abgestimmt",
+        "id": "ap12", "titel": "Richtlinie ORP.1 erstellt", "beschreibung": "Organisation und Personal: Richtlinie fuer Sicherheitsmanagement",
         "ergebnis": "Freigegebene Richtlinie ORP.1", "projekt_id": "p3", "verantwortlicher_id": "pe2",
         "status": "delegiert", "aufwand_h": 16, "aufwand_ist_h": 4,
         "deadline": "2026-04-15", "prioritaet": "mittel", "delegationslevel": "beraten",
-        "abhaengigkeiten": [], "tags": ["ORP.1", "Richtlinie"], "quelle": "manuell", "wiedervorlage": "2026-03-20",
+        "abhaengigkeiten": [], "tags": ["ORP.1", "Richtlinie"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-20",
         "erstellt": "2026-03-01T09:00:00.000Z", "geaendert": "2026-03-08T11:00:00.000Z"
       },
       {
-        "id": "ap13", "titel": "Ist-Aufnahme ORP.2 (Personal)", "beschreibung": "Aktuellen Stand der Personalsicherheit erheben: Einstellung, Austritt, Schulungen",
+        "id": "ap13", "titel": "Ist-Aufnahme ORP.2 (Personal)", "beschreibung": "Aktuellen Stand der Personalsicherheit erheben",
         "ergebnis": "Ist-Aufnahme-Bericht ORP.2", "projekt_id": "p3", "verantwortlicher_id": "pe4",
         "status": "delegiert", "aufwand_h": 16, "aufwand_ist_h": 0,
         "deadline": "2026-04-30", "prioritaet": "mittel", "delegationslevel": "anweisen",
-        "abhaengigkeiten": [], "tags": ["ORP.2", "Ist-Aufnahme"], "quelle": "manuell", "wiedervorlage": "2026-03-25",
+        "abhaengigkeiten": [], "tags": ["ORP.2", "Ist-Aufnahme"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-25",
         "erstellt": "2026-03-05T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z"
       },
       {
@@ -147,197 +160,179 @@
         "ergebnis": "BIA-Ergebnisbericht", "projekt_id": "p4", "verantwortlicher_id": "",
         "status": "in_arbeit", "aufwand_h": 40, "aufwand_ist_h": 25,
         "deadline": "2026-03-28", "prioritaet": "kritisch", "delegationslevel": "",
-        "abhaengigkeiten": [], "tags": ["BIA", "KRITIS"], "quelle": "manuell", "wiedervorlage": "2026-03-17",
+        "abhaengigkeiten": [], "tags": ["BIA", "KRITIS"], "quelle": "manuell",
+        "wiedervorlage": "2026-03-17",
         "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-03-14T09:00:00.000Z"
       },
       {
-        "id": "ap15", "titel": "Notfallhandbuch erstellt", "beschreibung": "IT-Notfallhandbuch mit Wiederanlaufplaenen, Eskalationswegen, Kontaktlisten",
+        "id": "ap15", "titel": "Notfallhandbuch erstellt", "beschreibung": "IT-Notfallhandbuch mit Wiederanlaufplaenen, Eskalationswegen",
         "ergebnis": "IT-Notfallhandbuch (Entwurf)", "projekt_id": "p4", "verantwortlicher_id": "pe1",
         "status": "offen", "aufwand_h": 32, "aufwand_ist_h": 0,
         "deadline": "2026-05-15", "prioritaet": "hoch", "delegationslevel": "befragen",
-        "abhaengigkeiten": ["ap14"], "tags": ["Notfallhandbuch"], "quelle": "manuell", "wiedervorlage": "",
+        "abhaengigkeiten": ["ap14"], "tags": ["Notfallhandbuch"], "quelle": "manuell",
+        "wiedervorlage": "",
         "erstellt": "2026-03-01T09:00:00.000Z", "geaendert": "2026-03-01T09:00:00.000Z"
       }
     ],
     "personen": [
       {
-        "id": "pe1", "name": "Carolin Mueller", "kuerzel": "CM",
+        "id": "pe1", "name": "Carolin Mueller", "kuerzel": "CM", "anrede": "Frau",
+        "rolle": "berater", "organisation": "HiSolutions",
         "schwerpunkte": ["ISMS", "BSI-Grundschutz", "Risikoanalyse", "Dokumentation"],
         "email": "c.mueller@hisolutions.com", "verfuegbarkeit": "verfuegbar",
         "notiz": "Senior Beraterin, 5 Jahre Erfahrung mit BSI-Grundschutz, sehr zuverlaessig",
+        "projekt_ids": ["p1", "p4"],
         "erstellt": "2026-01-10T09:00:00.000Z", "geaendert": "2026-01-10T09:00:00.000Z"
       },
       {
-        "id": "pe2", "name": "Thomas Weber", "kuerzel": "TW",
+        "id": "pe2", "name": "Thomas Weber", "kuerzel": "TW", "anrede": "Herr",
+        "rolle": "berater", "organisation": "HiSolutions",
         "schwerpunkte": ["ORP", "CON", "Richtlinien", "Awareness"],
         "email": "t.weber@hisolutions.com", "verfuegbarkeit": "teilweise",
         "notiz": "Teilzeit (60%), stark in Dokumentation und Richtlinienarbeit",
+        "projekt_ids": ["p3"],
         "erstellt": "2026-01-10T09:00:00.000Z", "geaendert": "2026-03-01T09:00:00.000Z"
       },
       {
-        "id": "pe3", "name": "Sarah Kim", "kuerzel": "SK",
+        "id": "pe3", "name": "Sarah Kim", "kuerzel": "SK", "anrede": "Frau",
+        "rolle": "berater", "organisation": "HiSolutions",
         "schwerpunkte": ["Audit", "SYS", "NET", "Penetrationstest"],
         "email": "s.kim@hisolutions.com", "verfuegbarkeit": "verfuegbar",
         "notiz": "Zertifizierte Auditorin (BSI-Grundschutz), technisch sehr stark",
+        "projekt_ids": ["p2"],
         "erstellt": "2026-01-15T09:00:00.000Z", "geaendert": "2026-02-20T09:00:00.000Z"
       },
       {
-        "id": "pe4", "name": "Markus Bauer", "kuerzel": "MB",
+        "id": "pe4", "name": "Markus Bauer", "kuerzel": "MB", "anrede": "Herr",
+        "rolle": "berater", "organisation": "HiSolutions",
         "schwerpunkte": ["ORP", "DER", "Notfallmanagement", "KRITIS"],
         "email": "m.bauer@hisolutions.com", "verfuegbarkeit": "verfuegbar",
         "notiz": "Junior Berater, seit 1 Jahr im Team, braucht noch Anleitung bei komplexen Themen",
+        "projekt_ids": ["p3", "p4"],
         "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
       },
       {
-        "id": "pe5", "name": "Dr. Lisa Hartmann", "kuerzel": "LH",
+        "id": "pe5", "name": "Dr. Lisa Hartmann", "kuerzel": "LH", "anrede": "Frau",
+        "rolle": "berater", "organisation": "HiSolutions",
         "schwerpunkte": ["Datenschutz", "DSGVO", "ISMS", "Zertifizierung"],
         "email": "l.hartmann@hisolutions.com", "verfuegbarkeit": "nicht_verfuegbar",
         "notiz": "Im Mutterschaftsurlaub bis Juni 2026, danach Teilzeit",
+        "projekt_ids": ["p1"],
         "erstellt": "2026-01-10T09:00:00.000Z", "geaendert": "2026-03-01T09:00:00.000Z"
+      },
+      {
+        "id": "pe6", "name": "Hans Schmidt", "kuerzel": "HS", "anrede": "Herr",
+        "rolle": "kundenansprechpartner", "organisation": "Stadtwerke Musterstadt GmbH",
+        "schwerpunkte": ["IT-Leitung"], "email": "h.schmidt@stadtwerke-musterstadt.de",
+        "verfuegbarkeit": "verfuegbar",
+        "notiz": "IT-Leiter, Hauptansprechpartner ISMS. Wechselt zum 01.04. den Arbeitgeber!",
+        "projekt_ids": ["p1"],
+        "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
+      },
+      {
+        "id": "pe7", "name": "Petra Meier", "kuerzel": "PM", "anrede": "Frau",
+        "rolle": "kundenansprechpartner", "organisation": "Kreisverwaltung Beispielkreis",
+        "schwerpunkte": ["Verwaltungsleitung", "IT-Sicherheit"], "email": "p.meier@kreis-beispiel.de",
+        "verfuegbarkeit": "verfuegbar",
+        "notiz": "IT-Sicherheitsbeauftragte der Kreisverwaltung",
+        "projekt_ids": ["p2"],
+        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
       }
     ],
     "meilensteine": [
-      {
-        "id": "ms1", "projekt_id": "p1", "titel": "Strukturanalyse abgenommen",
-        "datum": "2026-03-01", "status": "erreicht", "beschreibung": "Kunde hat Strukturanalyse-Ergebnisse abgenommen",
-        "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-03-01T10:00:00.000Z"
-      },
-      {
-        "id": "ms2", "projekt_id": "p1", "titel": "Schutzbedarfsfeststellung fertig",
-        "datum": "2026-03-21", "status": "offen", "beschreibung": "Schutzbedarf fuer alle Zielobjekte festgestellt und vom Kunden abgestimmt",
-        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
-      },
-      {
-        "id": "ms3", "projekt_id": "p1", "titel": "IT-Grundschutz-Check abgeschlossen",
-        "datum": "2026-05-30", "status": "offen", "beschreibung": "Soll-Ist-Vergleich komplett, Ergebnisse dokumentiert",
-        "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-01-20T09:00:00.000Z"
-      },
-      {
-        "id": "ms4", "projekt_id": "p1", "titel": "Zertifizierungsaudit",
-        "datum": "2026-06-30", "status": "offen", "beschreibung": "Externes Zertifizierungsaudit ISO 27001 auf Basis IT-Grundschutz",
-        "erstellt": "2026-01-15T09:00:00.000Z", "geaendert": "2026-01-15T09:00:00.000Z"
-      },
-      {
-        "id": "ms5", "projekt_id": "p2", "titel": "Vor-Ort-Audit Start",
-        "datum": "2026-03-17", "status": "gefaehrdet", "beschreibung": "Beginn der Vor-Ort-Pruefungen in allen 5 Fachbereichen",
-        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-03-13T09:00:00.000Z"
-      },
-      {
-        "id": "ms6", "projekt_id": "p2", "titel": "Auditbericht an Leitung",
-        "datum": "2026-04-15", "status": "offen", "beschreibung": "Finaler Auditbericht an die Verwaltungsleitung uebergeben",
-        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
-      },
-      {
-        "id": "ms7", "projekt_id": "p4", "titel": "BIA fertig",
-        "datum": "2026-03-28", "status": "offen", "beschreibung": "Business Impact Analyse fuer alle Kernprozesse abgeschlossen",
-        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
-      },
-      {
-        "id": "ms8", "projekt_id": "p4", "titel": "Notfalluebung durchgefuehrt",
-        "datum": "2026-05-31", "status": "offen", "beschreibung": "Erste Notfalluebung mit allen beteiligten Abteilungen",
-        "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z"
-      }
+      { "id": "ms1", "projekt_id": "p1", "titel": "Strukturanalyse abgenommen", "datum": "2026-03-01", "status": "erreicht", "beschreibung": "Kunde hat Strukturanalyse-Ergebnisse abgenommen", "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-03-01T10:00:00.000Z" },
+      { "id": "ms2", "projekt_id": "p1", "titel": "Schutzbedarfsfeststellung fertig", "datum": "2026-03-21", "status": "offen", "beschreibung": "Schutzbedarf fuer alle Zielobjekte festgestellt und abgestimmt", "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z" },
+      { "id": "ms3", "projekt_id": "p1", "titel": "IT-Grundschutz-Check abgeschlossen", "datum": "2026-05-30", "status": "offen", "beschreibung": "Soll-Ist-Vergleich komplett", "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-01-20T09:00:00.000Z" },
+      { "id": "ms4", "projekt_id": "p1", "titel": "Zertifizierungsaudit", "datum": "2026-06-30", "status": "offen", "beschreibung": "Externes Zertifizierungsaudit", "erstellt": "2026-01-15T09:00:00.000Z", "geaendert": "2026-01-15T09:00:00.000Z" },
+      { "id": "ms5", "projekt_id": "p2", "titel": "Vor-Ort-Audit Start", "datum": "2026-03-17", "status": "gefaehrdet", "beschreibung": "Beginn der Vor-Ort-Pruefungen", "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-03-13T09:00:00.000Z" },
+      { "id": "ms6", "projekt_id": "p2", "titel": "Auditbericht an Leitung", "datum": "2026-04-15", "status": "offen", "beschreibung": "Finaler Auditbericht", "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z" },
+      { "id": "ms7", "projekt_id": "p4", "titel": "BIA fertig", "datum": "2026-03-28", "status": "offen", "beschreibung": "Business Impact Analyse abgeschlossen", "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z" },
+      { "id": "ms8", "projekt_id": "p4", "titel": "Notfalluebung durchgefuehrt", "datum": "2026-05-31", "status": "offen", "beschreibung": "Erste Notfalluebung", "erstellt": "2026-02-01T09:00:00.000Z", "geaendert": "2026-02-01T09:00:00.000Z" }
     ],
     "notizen": [
-      {
-        "id": "n1", "projekt_id": "p1", "typ": "entscheidung",
-        "text": "Vorgehensweise Standard-Absicherung beschlossen. Basis-Absicherung reicht dem Kunden nicht, da Zertifizierung angestrebt wird. Management hat Budget fuer 2 Berater x 6 Monate freigegeben.",
-        "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-01-20T09:00:00.000Z"
-      },
-      {
-        "id": "n2", "projekt_id": "p1", "typ": "risiko",
-        "text": "IT-Leiter der Stadtwerke wechselt zum 01.04. den Arbeitgeber. Nachfolger noch nicht benannt. Risiko: Ansprechpartner fuer GS-Check fehlt, Freigabeprozesse verzögern sich.",
-        "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
-      },
-      {
-        "id": "n3", "projekt_id": "p2", "typ": "notiz",
-        "text": "FB Finanzen nutzt eine selbstentwickelte Access-Datenbank fuer Rechnungseingangspruefung — nicht im IT-Inventar erfasst. Muss als Shadow-IT dokumentiert werden.",
-        "erstellt": "2026-03-12T14:00:00.000Z", "geaendert": "2026-03-12T14:00:00.000Z"
-      },
-      {
-        "id": "n4", "projekt_id": "p2", "typ": "entscheidung",
-        "text": "Pruefung wird auf 5 (statt geplant 3) Fachbereiche ausgeweitet, da Verwaltungsleitung alle Bereiche mit Buergerkontakt einbeziehen moechte. Aufwand steigt um ca. 30%.",
-        "erstellt": "2026-02-20T09:00:00.000Z", "geaendert": "2026-02-20T09:00:00.000Z"
-      },
-      {
-        "id": "n5", "projekt_id": "p4", "typ": "risiko",
-        "text": "Klinikverbund hat keine getrennten Netze fuer Medizintechnik und Verwaltung. Bei einem Ransomware-Vorfall waeren alle Systeme gleichzeitig betroffen. Muss im Notfallhandbuch als Worst-Case-Szenario abgebildet werden.",
-        "erstellt": "2026-03-05T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z"
-      }
+      { "id": "n1", "projekt_id": "p1", "typ": "entscheidung", "text": "Vorgehensweise Standard-Absicherung beschlossen. Management hat Budget fuer 2 Berater x 6 Monate freigegeben.", "erstellt": "2026-01-20T09:00:00.000Z", "geaendert": "2026-01-20T09:00:00.000Z" },
+      { "id": "n2", "projekt_id": "p1", "typ": "risiko", "text": "IT-Leiter der Stadtwerke wechselt zum 01.04. Nachfolger noch nicht benannt. Risiko: Ansprechpartner fehlt, Freigabeprozesse verzoegern sich.", "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z" },
+      { "id": "n3", "projekt_id": "p2", "typ": "notiz", "text": "FB Finanzen nutzt eine selbstentwickelte Access-Datenbank — nicht im IT-Inventar. Muss als Shadow-IT dokumentiert werden.", "erstellt": "2026-03-12T14:00:00.000Z", "geaendert": "2026-03-12T14:00:00.000Z" },
+      { "id": "n4", "projekt_id": "p2", "typ": "entscheidung", "text": "Pruefung auf 5 statt 3 Fachbereiche ausgeweitet. Aufwand steigt um ca. 30%.", "erstellt": "2026-02-20T09:00:00.000Z", "geaendert": "2026-02-20T09:00:00.000Z" },
+      { "id": "n5", "projekt_id": "p4", "typ": "risiko", "text": "Klinikverbund hat keine getrennten Netze fuer Medizintechnik und Verwaltung. Muss im Notfallhandbuch als Worst-Case abgebildet werden.", "erstellt": "2026-03-05T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z" }
     ],
     "termine": [
       {
-        "id": "t1", "ics_uid": "outlook-demo-001@muster.de", "titel": "Jour fixe Stadtwerke ISMS",
+        "id": "t1", "ics_uid": "demo-001@muster.de", "titel": "Jour fixe Stadtwerke ISMS",
         "start": "2026-03-17T10:00:00.000Z", "ende": "2026-03-17T11:00:00.000Z",
-        "beschreibung": "Woechentlicher Statustermin mit IT-Leitung", "ort": "MS Teams",
+        "beschreibung": "Woechentlicher Statustermin", "ort": "MS Teams",
         "projekt_id": "p1", "ap_id": "", "quelle": "ics", "status": "aktiv",
+        "notiz": "", "teilnehmer": [{"name": "Hans Schmidt", "email": "h.schmidt@stadtwerke-musterstadt.de"}, {"name": "Carolin Mueller", "email": "c.mueller@hisolutions.com"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       },
       {
-        "id": "t2", "ics_uid": "outlook-demo-002@muster.de", "titel": "Audit Kick-off Kreisverwaltung",
+        "id": "t2", "ics_uid": "demo-002@muster.de", "titel": "Audit Kick-off Kreisverwaltung",
         "start": "2026-03-17T13:00:00.000Z", "ende": "2026-03-17T15:00:00.000Z",
-        "beschreibung": "Kick-off Vor-Ort-Audit mit allen FB-Leitern", "ort": "Kreisverwaltung, Raum 301",
+        "beschreibung": "Kick-off Vor-Ort-Audit", "ort": "Kreisverwaltung, Raum 301",
         "projekt_id": "p2", "ap_id": "", "quelle": "ics", "status": "aktiv",
+        "notiz": "", "teilnehmer": [{"name": "Petra Meier", "email": "p.meier@kreis-beispiel.de"}, {"name": "Sarah Kim", "email": "s.kim@hisolutions.com"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       },
       {
-        "id": "t3", "ics_uid": "outlook-demo-003@muster.de", "titel": "Interview IT-Leitung Finanzen",
+        "id": "t3", "ics_uid": "demo-003@muster.de", "titel": "Interview IT-Leitung Finanzen",
         "start": "2026-03-18T09:00:00.000Z", "ende": "2026-03-18T10:30:00.000Z",
-        "beschreibung": "Audit-Interview mit Herrn Schmidt, IT-Koordinator FB Finanzen", "ort": "Kreisverwaltung, Raum 205",
+        "beschreibung": "Audit-Interview FB Finanzen", "ort": "Kreisverwaltung, Raum 205",
         "projekt_id": "p2", "ap_id": "ap8", "quelle": "ics", "status": "aktiv",
+        "notiz": "Herr Schreiber, IT-Koordinator", "teilnehmer": [{"name": "Karl Schreiber", "email": "k.schreiber@kreis-beispiel.de"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       },
       {
-        "id": "t4", "ics_uid": "outlook-demo-004@muster.de", "titel": "BIA Workshop Klinikverbund",
+        "id": "t4", "ics_uid": "demo-004@muster.de", "titel": "BIA Workshop Klinikverbund",
         "start": "2026-03-19T09:00:00.000Z", "ende": "2026-03-19T16:00:00.000Z",
-        "beschreibung": "Ganztaegiger Workshop: BIA der Kernprozesse Notaufnahme, OP, Intensiv", "ort": "Klinikum Haupthaus",
+        "beschreibung": "BIA der Kernprozesse Notaufnahme, OP, Intensiv", "ort": "Klinikum Haupthaus",
         "projekt_id": "p4", "ap_id": "ap14", "quelle": "ics", "status": "aktiv",
+        "notiz": "", "teilnehmer": [{"name": "Dr. Frank Weber", "email": "f.weber@klinikverbund.de"}, {"name": "Markus Bauer", "email": "m.bauer@hisolutions.com"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       },
       {
-        "id": "t5", "ics_uid": "outlook-demo-005@muster.de", "titel": "Team-Meeting HiSolutions",
+        "id": "t5", "ics_uid": "demo-005@muster.de", "titel": "Team-Meeting HiSolutions",
         "start": "2026-03-20T14:00:00.000Z", "ende": "2026-03-20T15:00:00.000Z",
         "beschreibung": "Internes Teammeeting, Kapazitaetsplanung", "ort": "HiSolutions Buero",
         "projekt_id": "", "ap_id": "", "quelle": "ics", "status": "aktiv",
+        "notiz": "", "teilnehmer": [{"name": "Carolin Mueller", "email": "c.mueller@hisolutions.com"}, {"name": "Thomas Weber", "email": "t.weber@hisolutions.com"}, {"name": "Sarah Kim", "email": "s.kim@hisolutions.com"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       },
       {
-        "id": "t6", "ics_uid": "outlook-demo-006@muster.de", "titel": "ORP.1 Review mit Thomas",
-        "start": "2026-03-21T10:00:00.000Z", "ende": "2026-03-21T11:00:00.000Z",
-        "beschreibung": "Review der ORP.1-Richtlinie vor Kundenvorlage", "ort": "MS Teams",
-        "projekt_id": "p3", "ap_id": "ap12", "quelle": "ics", "status": "aktiv",
+        "id": "t6", "ics_uid": "demo-006@muster.de", "titel": "Jour fixe Stadtwerke ISMS",
+        "start": "2026-03-24T10:00:00.000Z", "ende": "2026-03-24T11:00:00.000Z",
+        "beschreibung": "Woechentlicher Statustermin", "ort": "MS Teams",
+        "projekt_id": "p1", "ap_id": "", "quelle": "ics", "status": "aktiv",
+        "notiz": "", "teilnehmer": [{"name": "Hans Schmidt", "email": "h.schmidt@stadtwerke-musterstadt.de"}],
         "importiert": "2026-03-15T08:00:00.000Z", "aktualisiert": "2026-03-15T08:00:00.000Z"
       }
     ],
     "risiken": [
+      { "id": "r1", "titel": "Ansprechpartner-Wechsel beim Kunden", "beschreibung": "IT-Leiter Stadtwerke geht zum 01.04., Nachfolger unklar.", "wahrscheinlichkeit": "hoch", "auswirkung": "hoch", "massnahme": "Stellvertreter identifizieren, kritische Freigaben vorziehen", "verantwortlicher_id": "", "status": "offen", "projekt_id": "p1", "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z" },
+      { "id": "r2", "titel": "Scope-Ausweitung Audit", "beschreibung": "Erweiterung von 3 auf 5 Fachbereiche, Budget nicht angepasst", "wahrscheinlichkeit": "hoch", "auswirkung": "mittel", "massnahme": "Nachtrag einreichen, FB nach Risiko priorisieren", "verantwortlicher_id": "", "status": "in_behandlung", "projekt_id": "p2", "erstellt": "2026-02-20T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z" },
+      { "id": "r3", "titel": "Fehlende Netzwerksegmentierung Klinik", "beschreibung": "Keine Trennung Medizintechnik/Verwaltung. Ransomware-Risiko.", "wahrscheinlichkeit": "mittel", "auswirkung": "hoch", "massnahme": "Im Notfallhandbuch abbilden, Segmentierungsprojekt empfehlen", "verantwortlicher_id": "pe4", "status": "offen", "projekt_id": "p4", "erstellt": "2026-03-05T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z" },
+      { "id": "r4", "titel": "Thomas Weber nur 60% verfuegbar", "beschreibung": "ORP-Umsetzung haengt an TW, Engpass bei Deadlines moeglich.", "wahrscheinlichkeit": "mittel", "auswirkung": "mittel", "massnahme": "Markus Bauer einarbeiten, kritische Richtlinien vorziehen", "verantwortlicher_id": "", "status": "offen", "projekt_id": "p3", "erstellt": "2026-03-08T09:00:00.000Z", "geaendert": "2026-03-08T09:00:00.000Z" }
+    ],
+    "tagesplan": [
       {
-        "id": "r1", "titel": "Ansprechpartner-Wechsel beim Kunden", "beschreibung": "IT-Leiter Stadtwerke geht zum 01.04., Nachfolger unklar. Kann GS-Check und Freigaben blockieren.",
-        "wahrscheinlichkeit": "hoch", "auswirkung": "hoch", "massnahme": "Fruehzeitig Stellvertreter identifizieren, parallele Ansprechpartner aufbauen, kritische Freigaben vorziehen",
-        "verantwortlicher_id": "", "status": "offen", "projekt_id": "p1",
-        "erstellt": "2026-03-10T09:00:00.000Z", "geaendert": "2026-03-10T09:00:00.000Z"
-      },
-      {
-        "id": "r2", "titel": "Scope-Ausweitung Audit", "beschreibung": "Erweiterung von 3 auf 5 Fachbereiche erhoeht Aufwand um 30%, Budget nicht angepasst",
-        "wahrscheinlichkeit": "hoch", "auswirkung": "mittel", "massnahme": "Nachtrag beim Kunden einreichen, Priorisierung der FB nach Risiko",
-        "verantwortlicher_id": "", "status": "in_behandlung", "projekt_id": "p2",
-        "erstellt": "2026-02-20T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z"
-      },
-      {
-        "id": "r3", "titel": "Fehlende Netzwerksegmentierung Klinik", "beschreibung": "Keine Trennung Medizintechnik/Verwaltung. Ransomware-Risiko betrifft alle Systeme gleichzeitig.",
-        "wahrscheinlichkeit": "mittel", "auswirkung": "hoch", "massnahme": "Als Sofortmassnahme im Notfallhandbuch abbilden, mittelfristig Segmentierungsprojekt empfehlen",
-        "verantwortlicher_id": "pe4", "status": "offen", "projekt_id": "p4",
-        "erstellt": "2026-03-05T09:00:00.000Z", "geaendert": "2026-03-05T09:00:00.000Z"
-      },
-      {
-        "id": "r4", "titel": "Thomas Weber nur 60% verfuegbar", "beschreibung": "ORP-Baustein-Umsetzung haengt stark an TW, aber nur Teilzeit verfuegbar. Engpass bei parallelen Deadlines moeglich.",
-        "wahrscheinlichkeit": "mittel", "auswirkung": "mittel", "massnahme": "Markus Bauer als Backup einarbeiten, kritische Richtlinien vorziehen",
-        "verantwortlicher_id": "", "status": "offen", "projekt_id": "p3",
-        "erstellt": "2026-03-08T09:00:00.000Z", "geaendert": "2026-03-08T09:00:00.000Z"
+        "id": "tp1", "datum": "2026-03-16",
+        "items": [
+          { "id": "ti1", "ap_id": "ap2", "titel": "Schutzbedarfsfeststellung weiterarbeiten", "erledigt": false, "notiz": "", "stunden": 0 },
+          { "id": "ti2", "ap_id": "ap8", "titel": "Interview-Vorbereitung FB Finanzen", "erledigt": false, "notiz": "", "stunden": 0 },
+          { "id": "ti3", "ap_id": "ap14", "titel": "BIA Workshop vorbereiten (Mittwoch)", "erledigt": false, "notiz": "", "stunden": 0 },
+          { "id": "ti4", "ap_id": "", "titel": "Reisekosten Q1 abrechnen", "erledigt": false, "notiz": "", "stunden": 0 },
+          { "id": "ti5", "ap_id": "ap5", "titel": "Sicherheitsleitlinie: offene Punkte klaeren", "erledigt": false, "notiz": "Ueberfaellig seit 14.03.", "stunden": 0 }
+        ],
+        "erstellt": "2026-03-16T07:00:00.000Z", "geaendert": "2026-03-16T07:00:00.000Z"
       }
     ]
   },
   "settings": {
     "kiUrl": "https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ki",
-    "kiKey": ""
+    "apAssistentUrl": "https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ap-assistent",
+    "kiKey": "",
+    "meinName": "Demo User",
+    "meinKuerzel": "demo",
+    "meinPersonId": "",
+    "startView": "meintag"
   }
 }
