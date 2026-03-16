@@ -667,6 +667,10 @@
                   Outlook aktualisieren
                 </button>
                 <input type="file" id="ics-input" accept=".ics" style="display:none" onchange="importICS(this)">
+                <button class="btn btn-secondary btn-sm" onclick="extractPersonenFromTermine()">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 11h-6"/></svg>
+                  Kontakte extrahieren
+                </button>
                 <span id="ics-status" style="font-size:10px;color:var(--ci-text-muted)"></span>
               </div>
             </div>
@@ -816,11 +820,6 @@
               <button class="btn btn-secondary btn-sm" onclick="reapplyBlueAntRollen()">Rollen neu zuordnen</button>
             </div>
             <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntProjekte(this)">
-          </div>
-          <div class="settings-section">
-            <h4>Personen aus Kalender</h4>
-            <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">Teilnehmer aus projekt-zugeordneten Terminen als Personen uebernehmen. hisolutions.com = internes Team, andere = Kundenkontakt.</p>
-            <button class="btn btn-secondary btn-sm" onclick="extractPersonenFromTermine()">Personen aus Terminen extrahieren</button>
           </div>
           <div class="settings-section">
             <h4>Datenverwaltung</h4>
