@@ -234,14 +234,18 @@
       .timeline-day-label { font-size: 11px; font-weight: 600; color: var(--ci-text-muted); padding: 8px var(--spacing-sm); background: var(--ci-bg-page); border-right: 1px solid var(--ci-border); display: flex; align-items: flex-start; }
       .timeline-day.is-today .timeline-day-label { color: var(--ci-color-brand-blue); font-weight: 700; background: rgba(0,85,255,0.04); }
       .timeline-day-entries { padding: 4px var(--spacing-sm); display: flex; flex-direction: column; gap: 3px; }
-      .timeline-entry { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 11px; line-height: 1.3; }
+      .timeline-entry { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 11px; line-height: 1.3; cursor: pointer; transition: background 0.1s, box-shadow 0.1s; }
+      .timeline-entry:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); filter: brightness(0.97); }
       .timeline-entry-type { width: 3px; height: 14px; border-radius: 2px; flex-shrink: 0; }
       .timeline-entry-type.type-ms { background: #7c3aed; }
       .timeline-entry-type.type-ap { background: var(--ci-color-brand-blue); }
-      .timeline-entry-type.type-ics { background: var(--ci-warn); }
+      .timeline-entry-type.type-ics-linked { background: #60a5fa; }
+      .timeline-entry-type.type-ics-unlinked { background: #94a3b8; }
       .timeline-ms { background: #f5f3ff; }
       .timeline-ap { background: #eff6ff; }
-      .timeline-ics { background: #fffbeb; }
+      .timeline-ics-linked { background: #eff6ff; }
+      .timeline-ics-unlinked { background: #f8fafc; }
+      .timeline-entry-time { font-size: 10px; color: var(--ci-text-muted); font-family: var(--font-mono); font-weight: 600; flex-shrink: 0; min-width: 32px; }
       .timeline-entry-titel { flex: 1; font-weight: 500; }
       .timeline-entry-projekt { font-size: 10px; color: var(--ci-text-muted); flex-shrink: 0; }
 
@@ -802,18 +806,11 @@
           </div>
           <div class="settings-section">
             <h4>BlueAnt Import (CSV)</h4>
-            <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">CSV aus BlueAnt exportieren und hier laden. Spalten werden automatisch zugeordnet (Trennzeichen: ; oder , oder Tab).</p>
+            <p style="font-size:11px;color:var(--ci-text-muted);margin-bottom:var(--spacing-sm)">Projektliste aus BlueAnt exportieren (CSV) und hier laden.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-projekte').click()">Projekte</button>
-              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-ap').click()">Arbeitspakete</button>
-              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-personen').click()">Personen</button>
-              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-ms').click()">Meilensteine</button>
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ba-import-projekte').click()">BlueAnt Projekte importieren</button>
             </div>
-            <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntCSV(this,'projekte')">
-            <input type="file" id="ba-import-ap" accept=".csv,.txt" style="display:none" onchange="importBlueAntCSV(this,'arbeitspakete')">
-            <input type="file" id="ba-import-personen" accept=".csv,.txt" style="display:none" onchange="importBlueAntCSV(this,'personen')">
-            <input type="file" id="ba-import-ms" accept=".csv,.txt" style="display:none" onchange="importBlueAntCSV(this,'meilensteine')">
-            <div style="font-size:10px;color:var(--ci-text-muted);margin-top:var(--spacing-xs)">Tipp: Reihenfolge Personen &rarr; Projekte &rarr; AP/MS (damit Zuordnungen greifen)</div>
+            <input type="file" id="ba-import-projekte" accept=".csv,.txt" style="display:none" onchange="importBlueAntProjekte(this)">
           </div>
           <div class="settings-section">
             <h4>Datenverwaltung</h4>
@@ -1633,7 +1630,9 @@
       });
       icsTermine.forEach(function(t) {
         var d = new Date(t.start);
-        if (d >= now && d <= end) entries.push({ date: t.start.slice(0, 10), type: 'ics', titel: t.titel, projekt: projektName(t.projekt_id), id: t.id, termin_id: t.id, hat_link: !!t.projekt_id });
+        var timeStr = '';
+        try { var dt = new Date(t.start); var hh = String(dt.getHours()).padStart(2, '0'); var mi = String(dt.getMinutes()).padStart(2, '0'); if (hh !== '00' || mi !== '00') timeStr = hh + ':' + mi; } catch(ex) {}
+        if (d >= now && d <= end) entries.push({ date: t.start.slice(0, 10), type: 'ics', titel: t.titel, projekt: projektName(t.projekt_id), id: t.id, termin_id: t.id, hat_link: !!t.projekt_id, time: timeStr });
       });
       entries.sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); });
 
@@ -1662,15 +1661,18 @@
           var isToday = dayKey === todayKey;
           h += '<div class="timeline-day' + (isToday ? ' is-today' : '') + '"><div class="timeline-day-label">' + dayNames[dd.getDay()] + ', ' + U.dateFmtShort(dayKey) + '</div><div class="timeline-day-entries">';
           weeks[weekKey][dayKey].forEach(function(e) {
-            var cls = e.type === 'ms' ? 'timeline-ms' : e.type === 'ics' ? 'timeline-ics' : 'timeline-ap';
-            var typeCls = 'type-' + e.type;
+            var cls, typeCls, onclick = '';
+            if (e.type === 'ms') { cls = 'timeline-ms'; typeCls = 'type-ms'; onclick = ' onclick="openModal(\'meilensteine\',\'' + escAttr(e.id) + '\')"'; }
+            else if (e.type === 'ap') { cls = 'timeline-ap'; typeCls = 'type-ap'; onclick = ' onclick="openModal(\'arbeitspakete\',\'' + escAttr(e.id) + '\')"'; }
+            else { cls = e.hat_link ? 'timeline-ics-linked' : 'timeline-ics-unlinked'; typeCls = e.hat_link ? 'type-ics-linked' : 'type-ics-unlinked'; onclick = ' onclick="openTerminDetail(\'' + escAttr(e.termin_id) + '\')"'; }
             var projektSelect = '';
             if (e.type === 'ics' && Store.projekte.length) {
               var currentPid = e.hat_link ? (Store.termine.find(function(t) { return t.id === e.termin_id; }) || {}).projekt_id || '' : '';
-              projektSelect = '<select style="font-size:9px;padding:1px 4px;border:1px solid var(--ci-border);border-radius:4px;background:#fff;cursor:pointer;width:auto;flex-shrink:0" onchange="linkTerminProjekt(\'' + escAttr(e.termin_id) + '\',this.value)"><option value="">\u2014</option>' + Store.projekte.map(function(p) { return '<option value="' + escAttr(p.id) + '"' + (p.id === currentPid ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select>';
+              projektSelect = '<select style="font-size:9px;padding:1px 4px;border:1px solid var(--ci-border);border-radius:4px;background:#fff;cursor:pointer;width:auto;flex-shrink:0" onclick="event.stopPropagation()" onchange="event.stopPropagation();linkTerminProjekt(\'' + escAttr(e.termin_id) + '\',this.value)"><option value="">\u2014</option>' + Store.projekte.map(function(p) { return '<option value="' + escAttr(p.id) + '"' + (p.id === currentPid ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select>';
             }
             var projektInfo = e.type === 'ics' ? projektSelect : (e.projekt ? '<span class="timeline-entry-projekt">' + esc(e.projekt) + '</span>' : '');
-            h += '<div class="timeline-entry ' + cls + '"><span class="timeline-entry-type ' + typeCls + '"></span><span class="timeline-entry-titel">' + esc(e.titel) + '</span>' + projektInfo + '</div>';
+            var timeHtml = e.time ? '<span class="timeline-entry-time">' + esc(e.time) + '</span>' : '';
+            h += '<div class="timeline-entry ' + cls + '"' + onclick + '><span class="timeline-entry-type ' + typeCls + '"></span>' + timeHtml + '<span class="timeline-entry-titel">' + esc(e.titel) + '</span>' + projektInfo + '</div>';
           });
           h += '</div></div>';
         });
@@ -1680,22 +1682,50 @@
     }
     function getWeekNumber(d) { const dt = new Date(d); dt.setHours(0, 0, 0, 0); dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7); const week1 = new Date(dt.getFullYear(), 0, 4); return 1 + Math.round(((dt - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); }
 
-    // ─── ICS PARSER (with UID extraction) ───
+    // ─── ICS PARSER (with UID extraction, Outlook-compatible) ───
+    function unfoldICS(text) {
+      // RFC 5545: lines starting with space or tab are continuations of the previous line
+      return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n[ \t]/g, '');
+    }
     function parseICS(text) {
-      const events = [];
-      const blocks = text.split('BEGIN:VEVENT');
+      var unfolded = unfoldICS(text);
+      var events = [];
+      var blocks = unfolded.split('BEGIN:VEVENT');
       blocks.shift();
       blocks.forEach(function(block) {
-        var get = function(key) { var m = block.match(new RegExp(key + '[^:]*:(.+)')); return m ? m[1].trim() : ''; };
+        // get(key): handles property parameters like DTSTART;TZID="...":value or SUMMARY;LANGUAGE=de:value
+        var get = function(key) {
+          var re = new RegExp('^' + key + '(?:;[^:]*)?:(.+)', 'm');
+          var mr = block.match(re);
+          return mr ? mr[1].trim() : '';
+        };
         var dtStart = get('DTSTART');
         if (dtStart) {
+          // Extract ATTENDEE names (CN parameter)
+          var attendees = [];
+          var attRe = /^ATTENDEE[^:]*?CN=([^;:]+)/gm;
+          var attMatch;
+          while ((attMatch = attRe.exec(block)) !== null) {
+            var cn = attMatch[1].replace(/^"/, '').replace(/"$/, '').trim();
+            if (cn) attendees.push(cn);
+          }
+          // Generate UID from DTSTART+SUMMARY hash if missing
+          var uid = get('UID');
+          if (!uid) {
+            var summary = get('SUMMARY');
+            var hashStr = dtStart + '|' + summary;
+            var hash = 0;
+            for (var ci = 0; ci < hashStr.length; ci++) { hash = ((hash << 5) - hash) + hashStr.charCodeAt(ci); hash |= 0; }
+            uid = 'gen_' + Math.abs(hash).toString(36) + '_' + dtStart.replace(/[^0-9]/g, '').slice(0, 8);
+          }
           events.push({
-            ics_uid: get('UID') || ('nouid_' + U.uid()),
+            ics_uid: uid,
             titel: get('SUMMARY'),
             start: parseICSDate(dtStart).toISOString(),
             ende: get('DTEND') ? parseICSDate(get('DTEND')).toISOString() : '',
             beschreibung: get('DESCRIPTION').replace(/\\n/g, '\n'),
-            ort: get('LOCATION')
+            ort: get('LOCATION'),
+            teilnehmer: attendees
           });
         }
       });
@@ -1703,12 +1733,16 @@
     }
     function parseICSDate(s) {
       if (!s) return new Date();
+      // Handle both "20260217T100000" (local) and "20260217T100000Z" (UTC)
+      var isUTC = s.charAt(s.length - 1) === 'Z';
       var clean = s.replace(/[^0-9T]/g, '');
       if (clean.length >= 8) {
-        var y = clean.slice(0, 4), m = clean.slice(4, 6), d = clean.slice(6, 8);
-        var hh = clean.length >= 13 ? clean.slice(9, 11) : '00';
+        var y = clean.slice(0, 4), mo = clean.slice(4, 6), d = clean.slice(6, 8);
+        var hh = clean.length >= 11 ? clean.slice(9, 11) : '00';
         var mm = clean.length >= 13 ? clean.slice(11, 13) : '00';
-        return new Date(y + '-' + m + '-' + d + 'T' + hh + ':' + mm + ':00');
+        var ss = clean.length >= 15 ? clean.slice(13, 15) : '00';
+        if (isUTC) return new Date(y + '-' + mo + '-' + d + 'T' + hh + ':' + mm + ':' + ss + 'Z');
+        return new Date(y + '-' + mo + '-' + d + 'T' + hh + ':' + mm + ':' + ss);
       }
       return new Date(s);
     }
@@ -1739,13 +1773,14 @@
         if (t.quelle !== 'ics') return;
         var match = newUIDs[t.ics_uid];
         if (match) {
-          // Update fields, preserve manual links
+          // Update fields, preserve manual links and notiz
           t.titel = match.titel;
           t.start = match.start;
           t.ende = match.ende;
           t.beschreibung = match.beschreibung;
           t.ort = match.ort;
-          t.status = 'aktiv';
+          t.teilnehmer = match.teilnehmer || [];
+          if (t.status !== 'ausgeblendet') t.status = 'aktiv';
           t.aktualisiert = now;
           updated++;
           delete newUIDs[t.ics_uid]; // consumed
@@ -1759,7 +1794,7 @@
         var ev = newUIDs[uid];
         Store.termine.push({
           id: U.uid(), ics_uid: ev.ics_uid, titel: ev.titel, start: ev.start, ende: ev.ende,
-          beschreibung: ev.beschreibung, ort: ev.ort || '',
+          beschreibung: ev.beschreibung, ort: ev.ort || '', teilnehmer: ev.teilnehmer || [], notiz: '',
           projekt_id: autoMatchProjekt(ev.titel), ap_id: '',
           quelle: 'ics', status: 'aktiv',
           importiert: now, aktualisiert: now
@@ -1790,39 +1825,57 @@
       var t = Store.termine.find(function(x) { return x.id === terminId; });
       if (t) { t.projekt_id = projektId; t.aktualisiert = new Date().toISOString(); Store.markDirty('termine'); Store.persist(); renderKalender(); }
     }
+    function openTerminDetail(terminId) {
+      var t = Store.termine.find(function(x) { return x.id === terminId; });
+      if (!t) { Toast.show('Termin nicht gefunden', 'error'); return; }
+      AS.modalType = 'termin_detail';
+      AS.modalEditId = terminId;
+      var startDt = '';
+      try { startDt = new Date(t.start).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch(ex) { startDt = t.start || ''; }
+      var endeDt = '';
+      if (t.ende) { try { endeDt = new Date(t.ende).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch(ex) { endeDt = t.ende; } }
+      var projOpts = '<option value="">\u2014 Kein Projekt</option>' + Store.projekte.map(function(p) { return '<option value="' + escAttr(p.id) + '"' + (t.projekt_id === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('');
+      var teilnehmerHtml = '';
+      if (t.teilnehmer && t.teilnehmer.length) {
+        teilnehmerHtml = '<div class="form-row"><div class="field-label">Teilnehmer</div><div style="font-size:11px;color:var(--ci-text-muted);padding:6px 0">' + t.teilnehmer.map(function(tn) { return esc(tn); }).join(', ') + '</div></div>';
+      }
+      var formHtml = '<div class="form-row"><div class="field-label">Titel</div><input type="text" name="titel" value="' + escAttr(t.titel) + '"></div>' +
+        '<div class="form-grid">' +
+        '<div class="form-row"><div class="field-label">Beginn</div><div style="font-size:12px;padding:8px 0;color:var(--ci-text-muted)">' + esc(startDt) + '</div></div>' +
+        (endeDt ? '<div class="form-row"><div class="field-label">Ende</div><div style="font-size:12px;padding:8px 0;color:var(--ci-text-muted)">' + esc(endeDt) + '</div></div>' : '') +
+        '</div>' +
+        (t.ort ? '<div class="form-row"><div class="field-label">Ort</div><div style="font-size:12px;padding:8px 0;color:var(--ci-text-muted)">' + esc(t.ort) + '</div></div>' : '') +
+        '<div class="form-row"><div class="field-label">Projekt-Zuordnung</div><select name="projekt_id">' + projOpts + '</select></div>' +
+        '<div class="form-row"><div class="field-label">Notiz</div><textarea name="notiz" rows="3" placeholder="Eigene Notizen zum Termin...">' + esc(t.notiz || '') + '</textarea></div>' +
+        teilnehmerHtml;
+      document.getElementById('modal-title').textContent = 'Termin-Detail';
+      document.getElementById('modal-body').innerHTML = formHtml;
+      document.getElementById('modal-delete-btn').style.display = '';
+      document.getElementById('modal-delete-btn').textContent = 'Aus Kalender ausblenden';
+      document.getElementById('modal-delete-btn').onclick = function() {
+        t.status = 'ausgeblendet'; t.aktualisiert = new Date().toISOString();
+        Store.markDirty('termine'); Store.persist();
+        closeModal(); renderKalender();
+        Toast.show('Termin ausgeblendet', 'info');
+      };
+      var saveBtn = document.getElementById('modal-save-btn');
+      saveBtn.textContent = 'Speichern';
+      saveBtn.onclick = function() {
+        var data = getFormData();
+        t.titel = data.titel || t.titel;
+        t.projekt_id = data.projekt_id || '';
+        t.notiz = data.notiz || '';
+        t.aktualisiert = new Date().toISOString();
+        Store.markDirty('termine'); Store.persist();
+        closeModal(); renderKalender();
+        Toast.show('Termin gespeichert', 'success');
+      };
+      document.getElementById('modal-overlay').classList.add('open');
+    }
 
     // ═══════════════════════════════════════════
     // BLUEANT CSV IMPORT
     // ═══════════════════════════════════════════
-    var BA_COL_MAPS = {
-      projekte: {
-        name: ['projektname', 'projekt-name', 'project name', 'name', 'bezeichnung', 'projekt'],
-        kunde: ['kunde', 'client', 'customer', 'auftraggeber'],
-        deadline: ['enddatum', 'end', 'ende', 'deadline', 'end date'],
-        beschreibung: ['beschreibung', 'description', 'bemerkung', 'kommentar'],
-        status: ['status', 'projektstatus'],
-        prioritaet: ['prioritaet', 'priority', 'prio'],
-      },
-      arbeitspakete: {
-        titel: ['name', 'bezeichnung', 'titel', 'arbeitspaket', 'activity', 'task', 'aufgabe'],
-        projekt_ref: ['projektname', 'projekt', 'project', 'projekt-name'],
-        deadline: ['enddatum', 'end', 'ende', 'deadline', 'end date'],
-        aufwand_h: ['aufwand', 'plan', 'aufwand (plan)', 'plan hours', 'stunden', 'aufwand_h'],
-        verantwortlicher_ref: ['verantwortlicher', 'responsible', 'zugewiesen', 'mitarbeiter', 'resource'],
-        status: ['status'],
-        beschreibung: ['beschreibung', 'description', 'bemerkung'],
-      },
-      personen: {
-        name: ['name', 'mitarbeiter', 'employee', 'vollname', 'full name'],
-        kuerzel: ['kuerzel', 'kuerzel', 'initials', 'short'],
-        email: ['email', 'e-mail', 'mail'],
-      },
-      meilensteine: {
-        titel: ['name', 'bezeichnung', 'meilenstein', 'milestone', 'titel'],
-        projekt_ref: ['projektname', 'projekt', 'project'],
-        datum: ['datum', 'date', 'termin', 'faellig'],
-      },
-    };
     function parseCSV(text, sep) {
       sep = sep || ';';
       var rows = [], field = '', fields = [], inQ = false;
@@ -1835,127 +1888,61 @@
       }
       return rows;
     }
-    function detectCSVSeparator(text) {
-      var first = text.split('\n')[0] || '';
-      var semis = (first.match(/;/g) || []).length;
-      var commas = (first.match(/,/g) || []).length;
-      var tabs = (first.match(/\t/g) || []).length;
-      if (tabs > semis && tabs > commas) return '\t';
-      if (commas > semis) return ',';
-      return ';';
-    }
-    function matchColumns(headers, colMap) {
-      var mapping = {};
-      Object.keys(colMap).forEach(function(field) {
-        var aliases = colMap[field];
-        var idx = -1;
-        for (var i = 0; i < headers.length && idx < 0; i++) {
-          var h = headers[i].toLowerCase().trim();
-          if (aliases.indexOf(h) >= 0) idx = i;
-        }
-        if (idx >= 0) mapping[field] = idx;
-      });
-      return mapping;
-    }
-    function importBlueAntCSV(input, targetType) {
+    function importBlueAntProjekte(input) {
       var file = input.files[0]; if (!file) return;
       var reader = new FileReader();
       reader.onload = function(e) {
         try {
           var text = e.target.result;
-          var sep = detectCSVSeparator(text);
-          var rows = parseCSV(text, sep);
-          if (rows.length < 2) { Toast.show('CSV leer oder nur Header', 'error'); return; }
-          var headers = rows[0];
-          var colMap = BA_COL_MAPS[targetType];
-          if (!colMap) { Toast.show('Unbekannter Importtyp: ' + targetType, 'error'); return; }
-          var mapping = matchColumns(headers, colMap);
-          var dataRows = rows.slice(1);
-          var count = 0;
-          if (targetType === 'projekte') {
-            var nameIdx = mapping.name;
-            if (nameIdx === undefined) { Toast.show('Spalte "Name" nicht gefunden. Gefunden: ' + headers.join(', '), 'error'); return; }
-            dataRows.forEach(function(row) {
-              var name = row[nameIdx]; if (!name) return;
-              if (Store.projekte.some(function(p) { return p.name === name; })) return; // skip duplicates
-              Store.projekte.push({
-                id: U.uid(), name: name,
-                kunde: mapping.kunde !== undefined ? row[mapping.kunde] || '' : '',
-                deadline: mapping.deadline !== undefined ? normalizeDate(row[mapping.deadline]) : '',
-                beschreibung: mapping.beschreibung !== undefined ? row[mapping.beschreibung] || '' : '',
-                status: 'aktiv', rolle: 'leiter', prioritaet: 'mittel', tags: [],
-                erstellt: new Date().toISOString(), geaendert: new Date().toISOString()
-              });
-              count++;
+          var lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+          // BlueAnt format: line 1 = "Sucheinstellungen:", line 2 = headers, data from line 3
+          if (lines.length < 3) { Toast.show('CSV zu kurz (mind. 3 Zeilen erwartet)', 'error'); return; }
+          // Skip line 1 ("Sucheinstellungen:")
+          // Parse line 2 as headers — the first column is mangled: "Tabellenansicht""Gantt-Ansicht""Nummer"
+          // We treat it as "Nummer" (col 0)
+          var dataLines = lines.slice(2).filter(function(l) { return l.trim(); });
+          var rows = [];
+          dataLines.forEach(function(line) { var parsed = parseCSV(line, ';'); if (parsed.length) rows.push(parsed[0]); });
+          if (!rows.length) { Toast.show('Keine Datenzeilen gefunden', 'error'); return; }
+          // Column mapping: 0=Nummer, 1=Name, 2=Status, 3=Projektstart, 4=Projektende, 5=PL, 6=Stellvertreter, 7=Ressourcen
+          var meinKuerzel = (settings.meinName || '').trim().toLowerCase().slice(0, 3);
+          var now = new Date().toISOString();
+          var count = 0, skipped = 0;
+          rows.forEach(function(row) {
+            var rawName = (row[1] || '').trim();
+            if (!rawName) return;
+            // Remove leading "XX." numbering prefix (e.g. "21." or "63330.")
+            var cleanName = rawName.replace(/^\d+\./, '').trim();
+            if (!cleanName) cleanName = rawName;
+            // Skip duplicates by name
+            if (Store.projekte.some(function(p) { return p.name === cleanName; })) { skipped++; return; }
+            var nummer = (row[0] || '').trim();
+            var baStatus = (row[2] || '').trim().toLowerCase();
+            var ende = normalizeDate((row[4] || '').trim());
+            var pl = (row[5] || '').trim();
+            var stellv = (row[6] || '').trim();
+            var ressourcen = (row[7] || '').trim();
+            // Map BlueAnt status to aktiv/abgeschlossen
+            var status = 'aktiv';
+            if (baStatus.indexOf('abgeschlossen') >= 0 || baStatus.indexOf('beendet') >= 0 || baStatus.indexOf('closed') >= 0) status = 'abgeschlossen';
+            // Determine rolle from PL/Stellv kuerzel vs settings.meinName
+            var rolle = 'mitglied';
+            if (meinKuerzel && pl && pl.toLowerCase().slice(0, 3) === meinKuerzel) rolle = 'leiter';
+            else if (meinKuerzel && stellv && stellv.toLowerCase().slice(0, 3) === meinKuerzel) rolle = 'stellvertreter';
+            Store.projekte.push({
+              id: U.uid(), name: cleanName, kunde: '',
+              rolle: rolle, status: status, prioritaet: 'mittel',
+              deadline: ende,
+              tags: nummer ? [nummer] : [],
+              beschreibung: 'PL: ' + pl + ', Ressourcen: ' + ressourcen,
+              erstellt: now, geaendert: now
             });
-            Store.markDirty('projekte');
-          } else if (targetType === 'arbeitspakete') {
-            var titelIdx = mapping.titel;
-            if (titelIdx === undefined) { Toast.show('Spalte "Titel/Name" nicht gefunden. Gefunden: ' + headers.join(', '), 'error'); return; }
-            dataRows.forEach(function(row) {
-              var titel = row[titelIdx]; if (!titel) return;
-              var projektId = '';
-              if (mapping.projekt_ref !== undefined) {
-                var pName = row[mapping.projekt_ref];
-                var proj = Store.projekte.find(function(p) { return p.name === pName; });
-                if (proj) projektId = proj.id;
-              }
-              var verantId = '';
-              if (mapping.verantwortlicher_ref !== undefined) {
-                var vName = row[mapping.verantwortlicher_ref];
-                var pers = Store.personen.find(function(p) { return p.name === vName || p.kuerzel === vName; });
-                if (pers) verantId = pers.id;
-              }
-              Store.arbeitspakete.push({
-                id: U.uid(), titel: titel, projekt_id: projektId, verantwortlicher_id: verantId,
-                aufwand_h: mapping.aufwand_h !== undefined ? parseFloat(row[mapping.aufwand_h]) || 0 : 0,
-                deadline: mapping.deadline !== undefined ? normalizeDate(row[mapping.deadline]) : '',
-                beschreibung: mapping.beschreibung !== undefined ? row[mapping.beschreibung] || '' : '',
-                status: 'offen', prioritaet: 'mittel', quelle: 'blueant', tags: [],
-                erstellt: new Date().toISOString(), geaendert: new Date().toISOString()
-              });
-              count++;
-            });
-            Store.markDirty('arbeitspakete');
-          } else if (targetType === 'personen') {
-            var pNameIdx = mapping.name;
-            if (pNameIdx === undefined) { Toast.show('Spalte "Name" nicht gefunden. Gefunden: ' + headers.join(', '), 'error'); return; }
-            dataRows.forEach(function(row) {
-              var name = row[pNameIdx]; if (!name) return;
-              if (Store.personen.some(function(p) { return p.name === name; })) return;
-              Store.personen.push({
-                id: U.uid(), name: name,
-                kuerzel: mapping.kuerzel !== undefined ? row[mapping.kuerzel] || '' : '',
-                email: mapping.email !== undefined ? row[mapping.email] || '' : '',
-                schwerpunkte: [], verfuegbarkeit: 'verfuegbar', notiz: '',
-                erstellt: new Date().toISOString(), geaendert: new Date().toISOString()
-              });
-              count++;
-            });
-            Store.markDirty('personen');
-          } else if (targetType === 'meilensteine') {
-            var mTitelIdx = mapping.titel;
-            if (mTitelIdx === undefined) { Toast.show('Spalte "Titel" nicht gefunden. Gefunden: ' + headers.join(', '), 'error'); return; }
-            dataRows.forEach(function(row) {
-              var titel = row[mTitelIdx]; if (!titel) return;
-              var projektId = '';
-              if (mapping.projekt_ref !== undefined) {
-                var pName = row[mapping.projekt_ref];
-                var proj = Store.projekte.find(function(p) { return p.name === pName; });
-                if (proj) projektId = proj.id;
-              }
-              Store.meilensteine.push({
-                id: U.uid(), titel: titel, projekt_id: projektId,
-                datum: mapping.datum !== undefined ? normalizeDate(row[mapping.datum]) : '',
-                status: 'offen', beschreibung: '',
-                erstellt: new Date().toISOString(), geaendert: new Date().toISOString()
-              });
-              count++;
-            });
-            Store.markDirty('meilensteine');
-          }
-          Store.persist(); renderAll();
-          Toast.show(count + ' ' + targetType + ' aus BlueAnt importiert', 'success');
+            count++;
+          });
+          Store.markDirty('projekte'); Store.persist(); renderAll();
+          var msg = count + ' Projekte aus BlueAnt importiert';
+          if (skipped) msg += ' (' + skipped + ' Duplikate uebersprungen)';
+          Toast.show(msg, 'success');
         } catch (err) { Toast.show('CSV-Import fehlgeschlagen: ' + err.message, 'error'); console.error(err); }
       };
       reader.readAsText(file);
