@@ -732,6 +732,10 @@
                 <input type="text" id="set-mein-name" placeholder="z.B. Ben Neweling">
               </div>
               <div class="form-row">
+                <div class="field-label">Mein BlueAnt-Kuerzel</div>
+                <input type="text" id="set-mein-kuerzel" placeholder="z.B. ben" style="width:100%">
+              </div>
+              <div class="form-row">
                 <div class="field-label">Ich bin (Person)</div>
                 <select id="set-mein-person" style="width:100%">
                   <option value="">(nicht zugeordnet)</option>
@@ -948,7 +952,7 @@
     const SETTINGS_DEFAULTS = {
       kiUrl: 'https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ki', kiKey: '',
       apAssistentUrl: 'https://n8ntest.germanywestcentral.cloudapp.azure.com/webhook/leitstand-ap-assistent',
-      meinName: '', meinPersonId: '',
+      meinName: '', meinKuerzel: '', meinPersonId: '',
       badgeProjekte: 'alle', // 'alle' | 'aktive'
       cockpitProjekte: 'aktive', // 'alle' | 'aktive'
       prioListeAnzahl: 10,
@@ -1037,6 +1041,7 @@
       document.getElementById('set-ki-key').value = U.deobfuscate(settings.kiKey || '');
       document.getElementById('set-ap-assistent-url').value = settings.apAssistentUrl || '';
       document.getElementById('set-mein-name').value = settings.meinName || '';
+      document.getElementById('set-mein-kuerzel').value = settings.meinKuerzel || '';
       var sel = document.getElementById('set-mein-person');
       sel.innerHTML = '<option value="">(nicht zugeordnet)</option>';
       Store.personen.forEach(function(p) { var opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name + (p.kuerzel ? ' (' + p.kuerzel + ')' : ''); if (settings.meinPersonId === p.id) opt.selected = true; sel.appendChild(opt); });
@@ -1056,6 +1061,7 @@
       settings.kiKey = U.obfuscate(document.getElementById('set-ki-key').value.trim());
       settings.apAssistentUrl = document.getElementById('set-ap-assistent-url').value.trim();
       settings.meinName = document.getElementById('set-mein-name').value.trim();
+      settings.meinKuerzel = document.getElementById('set-mein-kuerzel').value.trim().toLowerCase();
       settings.meinPersonId = document.getElementById('set-mein-person').value;
       settings.startView = document.getElementById('set-startView').value;
       settings.badgeProjekte = document.getElementById('set-badgeProjekte').value;
@@ -1905,7 +1911,7 @@
           dataLines.forEach(function(line) { var parsed = parseCSV(line, ';'); if (parsed.length) rows.push(parsed[0]); });
           if (!rows.length) { Toast.show('Keine Datenzeilen gefunden', 'error'); return; }
           // Column mapping: 0=Nummer, 1=Name, 2=Status, 3=Projektstart, 4=Projektende, 5=PL, 6=Stellvertreter, 7=Ressourcen
-          var meinKuerzel = (settings.meinName || '').trim().toLowerCase().slice(0, 3);
+          var meinKuerzel = (settings.meinKuerzel || '').trim().toLowerCase();
           var now = new Date().toISOString();
           var count = 0, skipped = 0;
           rows.forEach(function(row) {
@@ -1927,8 +1933,10 @@
             if (baStatus.indexOf('abgeschlossen') >= 0 || baStatus.indexOf('beendet') >= 0 || baStatus.indexOf('closed') >= 0) status = 'abgeschlossen';
             // Determine rolle from PL/Stellv kuerzel vs settings.meinName
             var rolle = 'mitglied';
-            if (meinKuerzel && pl && pl.toLowerCase().slice(0, 3) === meinKuerzel) rolle = 'leiter';
-            else if (meinKuerzel && stellv && stellv.toLowerCase().slice(0, 3) === meinKuerzel) rolle = 'stellvertreter';
+            var plList = pl.toLowerCase().split(/[,\s"]+/).filter(Boolean);
+            var stvList = stellv.toLowerCase().split(/[,\s"]+/).filter(Boolean);
+            if (meinKuerzel && plList.indexOf(meinKuerzel) >= 0) rolle = 'leiter';
+            else if (meinKuerzel && stvList.indexOf(meinKuerzel) >= 0) rolle = 'stellvertreter';
             Store.projekte.push({
               id: U.uid(), name: cleanName, kunde: '',
               rolle: rolle, status: status, prioritaet: 'mittel',
